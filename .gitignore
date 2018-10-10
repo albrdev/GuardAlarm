@@ -1,0 +1,13 @@
+*
+!src/
+!src/*
+!inc/
+!inc/*
+!obj/
+!obj/*
+!bin/
+!bin/*
+!.gitignore
+!.gitattributes
+!Makefile
+!*.md
