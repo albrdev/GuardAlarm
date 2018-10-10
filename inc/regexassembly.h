@@ -21,6 +21,11 @@ public:
     // Set methods
     void SetPattern(const std::string& value);
 
+    bool Match(const std::string& input, const std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const;
+    bool Match(const std::string& input, std::smatch& result, const std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const;
+    bool Match(const std::string::const_iterator& start, const std::string::const_iterator& end, const std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const;
+    bool Match(const std::string::const_iterator& start, const std::string::const_iterator& end, std::smatch& result, const std::regex_constants::match_flag_type flags = std::regex_constants::match_default) const;
+
     // Constructors
     RegexAssembly(const std::string& pattern);
     RegexAssembly(void);

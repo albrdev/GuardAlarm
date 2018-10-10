@@ -3,7 +3,6 @@
 
 #include <string>
 #include <sstream>
-#include <regex>
 #include "regexassembly.h"
 
 enum UserStatus

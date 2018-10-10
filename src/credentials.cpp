@@ -49,7 +49,7 @@ bool Credentials::ValidateStatus(const std::string& value)
 bool Credentials::ParseCSV(const std::string& value, Credentials& result)
 {
     std::smatch match;
-    if(!std::regex_match(value, match, c_CSVRegex.GetRegex()))
+    if(!c_CSVRegex.Match(value, match))
     {
         return false;
     }
@@ -91,7 +91,7 @@ std::string Credentials::ToString(void) const
     return stream.str();
 }
 
-std::ostream& operator <<(std::ostream &stream, const Credentials& object)
+std::ostream& operator <<(std::ostream& stream, const Credentials& object)
 {
     return stream << object.ToString();
 }
