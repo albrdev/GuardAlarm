@@ -3,6 +3,8 @@
 
 #include <string>
 #include <sstream>
+#include <regex>
+#include "regexassembly.h"
 
 enum UserStatus
 {
@@ -13,15 +15,18 @@ enum UserStatus
 
 class Credentials
 {
+private:
+    friend std::ostream& operator <<(std::ostream& stream, const Credentials& object);
+
 protected:
     // Member variables, protected from outside interventions
-    static const int USERNAME_MIN = 3;
-    static const int USERNAME_MAX = 16;
-    static const char* USERNAME_VALIDCHARS;
-
-    static const int PASSWORD_MIN = 4;
-    static const int PASSWORD_MAX = 6;
-    static const char* PASSWORD_VALIDCHARS;
+    static const RegexAssembly c_IDRegex;
+    static const RegexAssembly c_TagIDRegex;
+    static const RegexAssembly c_UsernameRegex;
+    static const RegexAssembly c_PasswordRegex;
+    static const RegexAssembly c_StatusRegex;
+    static const RegexAssembly c_ReservedRegex;
+    static const RegexAssembly c_CSVRegex;
 
     static int s_LastID;
 
@@ -35,8 +40,13 @@ protected:
 
 public:
     // Static methods to check if a string complies with the rules for Username/PIN
+    static bool ValidateID(const std::string& value);
+    static bool ValidateTagID(const std::string& value);
     static bool ValidateUsername(const std::string& value);
     static bool ValidatePassword(const std::string& value);
+    static bool ValidateStatus(const std::string& value);
+
+    static bool ParseCSV(const std::string& value, Credentials& result);
 
     // Get methods
     int GetID(void) const;
@@ -53,7 +63,6 @@ public:
     void SetStatus(const UserStatus value);
 
     std::string ToString(void) const;
-    friend std::ostream& operator <<(std::ostream& stream, const Credentials& object);
 
     // Constructors
     Credentials(const int id, const int tagID, const std::string& username, const std::string& password, UserStatus status);

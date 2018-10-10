@@ -64,7 +64,6 @@ bool Database::Load(const std::string& filePath, Database& result)
     }
 
     std::string line;
-    std::regex regex("([0-9]+);([0-9]{4,6});([a-zA-Z]+);([0-9]*);([1-3]);(.*)");
     while(std::getline(stream, line))
     {
         if(line.empty())
@@ -72,23 +71,14 @@ bool Database::Load(const std::string& filePath, Database& result)
             continue;
         }
 
-        std::smatch match;
-        if(!std::regex_match(line, match, regex))
+        Credentials entry;
+        if(!Credentials::ParseCSV(line, entry))
         {
             stream.close();
             return false;
         }
 
-        Credentials credentials;
-        credentials.SetID(std::stoi(match[1]));
-
-        if(!((std::string)match[4]).empty())
-            credentials.SetTagID(std::stoi(match[4]));
-
-        credentials.SetUsername(match[3]);
-        credentials.SetPassword(match[2]);
-        credentials.SetStatus((UserStatus)std::stoi(match[5]));
-        result.Add(credentials);
+        result.Add(entry);
     }
 
     if(stream.bad())

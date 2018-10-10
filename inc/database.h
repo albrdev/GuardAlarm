@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <fstream>
 #include <vector>
-#include <regex>
 #include "generic.h"
 #include "credentials.h"
 
@@ -13,7 +12,6 @@ class Database
 protected:
     typedef std::vector<Credentials> container_t;
     container_t m_Content; // Underlying conten
-    //std::regex regex("([0-9]+);([0-9]{4,6});([a-zA-Z]+);([0-9]*);([1-3]);(.*)");
 
 public:
     std::size_t Count(void) const;
