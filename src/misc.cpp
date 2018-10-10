@@ -1,7 +1,7 @@
 #include "misc.h"
 
 /*
-    checkPIN: Checks if the provided PIN matches the one stored in the database
+    checkPassword: Checks if the provided password matches the one stored in the database
               Returns status bits of the authentication
                 AS_SUCCESS: The passwords matched successfully
                 AS_EMERGENCY: The password matched with its emergency version, an attack might be possible
@@ -9,15 +9,15 @@
 
                 AuthStatus is a bitflag enum, we can set different bits with OR and have multiple statuses set in one integer
 */
-int checkPIN(const std::string& providedPIN, const std::string& storedPIN)
+int checkPassword(const std::string& providedPassword, const std::string& storedPassword)
 {
-    if(providedPIN != storedPIN)
+    if(providedPassword != storedPassword)
     {
-        std::string temp = storedPIN;
+        std::string temp = storedPassword;
         size_t lastIndex = temp.length() - 1;
         temp[lastIndex] = (temp[lastIndex] == '9' ? '0' : (char)(temp[lastIndex] + 1)); // Had to cast to char again
 
-        if(providedPIN == temp)
+        if(providedPassword == temp)
         {
             return AS_SUCCESS | AS_EMERGENCY; // Return both these bits to indicate that it's not just a successfull login, it's also an emergency
         }
@@ -29,16 +29,16 @@ int checkPIN(const std::string& providedPIN, const std::string& storedPIN)
 }
 
 /*
-    userLogin: Finds user in database and checks if PIN is correct
+    userLogin: Finds user in database and checks if password is correct
                Uses a reference to a pointer because I think return value should be the status of the login attempt
 */
 int userLogin(const Credentials& providedCredentials, Database& database, Credentials*& result)
 {
-    return (result = database.FindByUsername(providedCredentials.GetUsername())) != NULL ? checkPIN(providedCredentials.GetPIN(), result->GetPIN()) : AS_FAILURE;
+    return (result = database.FindByUsername(providedCredentials.GetUsername())) != NULL ? checkPassword(providedCredentials.GetPassword(), result->GetPassword()) : AS_FAILURE;
 }
 
 /*
-    emergencyResponse: This function determines what to do when the emergency PIN has been entered (Now it will just display a message + timestamp)
+    emergencyResponse: This function determines what to do when the emergency password has been entered (Now it will just display a message + timestamp)
 */
 void emergencyResponse(void)
 {
@@ -47,7 +47,7 @@ void emergencyResponse(void)
 }
 
 /*
-    inputCredentials: Login input dialog, asks for username and PIN and stores them in a Credentials object passed as a referece to this function
+    inputCredentials: Login input dialog, asks for username and password and stores them in a Credentials object passed as a referece to this function
 */
 void inputCredentials(Credentials& credentials)
 {
@@ -58,7 +58,7 @@ void inputCredentials(Credentials& credentials)
         // do { ... } while(false); will loop only once, but we will have the ability to break out of it anytime we want (and try all the input phases again), which will save us from nestling if, else if, else
         do
         {
-            std::string username, pin;
+            std::string username, password;
 
             printf("Username: ");
             readString(username);
@@ -69,53 +69,53 @@ void inputCredentials(Credentials& credentials)
                 break;
             }
 
-            printf("Input PIN: ");
-            readString(pin);
-            validationSuccessful = Credentials::ValidatePIN(pin);
+            printf("Input password: ");
+            readString(password);
+            validationSuccessful = Credentials::ValidatePassword(password);
             if(!validationSuccessful)
             {
                 fprintf(stderr, "*** Error: Invalid password input\n");
                 break;
             }
 
-            credentials = Credentials(username, pin);
+            credentials = Credentials(username, password);
         } while(false);
     }
 }
 
 /*
-    changePIN: Change PIN with an input and a second confirmation
-               Return true if both strings met the PIN requirements and are equal
-               If successfull, sets out parameter 'pin' to the typed PIN
+    changePassword: Change password with an input and a second confirmation
+               Return true if both strings met the password requirements and are equal
+               If successfull, sets out parameter 'password' to the typed password
 */
-bool changePIN(std::string& pin)
+bool changePassword(std::string& password)
 {
     std::string temp1, temp2;
 
-    printf("Type new PIN: ");
+    printf("Type new password: ");
     readString(temp1);
-    if(!Credentials::ValidatePIN(temp1))
+    if(!Credentials::ValidatePassword(temp1))
     {
         fprintf(stderr, "*** Error: Invalid password format\n");
         return false;
     }
 
-    printf("Retype new PIN: ");
+    printf("Retype new password: ");
     readString(temp2);
     if(temp2 != temp1)
     {
-        fprintf(stderr, "*** Error: PIN:s mismatch\n");
+        fprintf(stderr, "*** Error: password:s mismatch\n");
         return false;
     }
 
-    pin = temp1;
+    password = temp1;
     return true;
 }
 
 /*
     configMenu: This is the menu available when logged in. I want to alter variables from the calling function (main) inside this and therefore i used references, which here is kind of ugly, out a simple solution
                 Returns 'true' if the menu should continue to ask for options and 'false' if the user wants to log out
-                Parameter 'credentials' for changing PIN code (needed a pointer to update the database entry directly)
+                Parameter 'credentials' for changing password code (needed a pointer to update the database entry directly)
                 Parameter 'isAlarmed' is an out parameter to set the variable in the calling function
 */
 bool configMenu(Credentials* const credentials, bool& isAlarmed)
@@ -126,7 +126,7 @@ bool configMenu(Credentials* const credentials, bool& isAlarmed)
     while(!validChoice)
     {
         printf("%c) Turn alarm %s\n", MO_SETALARM, statusString(!isAlarmed).c_str());
-        printf("%c) Change PIN\n", MO_CHANGEPIN);
+        printf("%c) Change password\n", MO_CHANGEPASSWORD);
         printf("%c) Log out\n", MO_LOGOUT);
         printf("%c) Exit\n", MO_EXIT);
 
@@ -148,14 +148,14 @@ bool configMenu(Credentials* const credentials, bool& isAlarmed)
 
             // Because of a temporary variable inside a case, I had to encapsule the following to avoid compilation error (I might as well wrap all case labels in {} blocks).
             // Variable 'temp' exists otherwise in all the case labels below it.
-            case MO_CHANGEPIN:
+            case MO_CHANGEPASSWORD:
             {
                 std::string temp;
-                if(changePIN(temp))
+                if(changePassword(temp))
                 {
-                    // If new PIN is acceptable, do the change in the database (With a pointer you don't need to find the entry again)
-                    credentials->SetPIN(temp);
-                    printf("*** PIN changed\n");
+                    // If new password is acceptable, do the change in the database (With a pointer you don't need to find the entry again)
+                    credentials->SetPassword(temp);
+                    printf("*** Password changed\n");
                 }
 
                 validChoice = true;

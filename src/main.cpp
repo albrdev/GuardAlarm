@@ -8,8 +8,6 @@
     I be consistent I would have changed the input too to some C function, like scanf, but I didn't have time, so I keep std::cin
 */
 
-void populateDatabase(Database& database);
-
 int main(void)
 {
     const int LOGINATTEMPTS_MAX = 3; // Uppercase for constants, right?
@@ -20,11 +18,17 @@ int main(void)
     // Remove buffered output for 'stderr'
     if(setvbuf(stderr, NULL, _IONBF, 0) != 0)
     {
-        fprintf(stderr, "Could not set \'stderr\' unbuffered");
+        fprintf(stderr, "Could not set \'stderr\' unbuffered\n");
         return 1;
     }
 
-    populateDatabase(database);
+    if(!Database::Load("users.dat", database))
+    {
+        fprintf(stderr, "*** Error reading database: %s:%llu\n", "users.dat", database.Count() + 1);
+        return 2;
+    }
+
+    printf("Database successfully loaded %llu entries\n", database.Count());
 
     int attemptedLogins = 0;
     while(true)
@@ -36,7 +40,7 @@ int main(void)
         printf("Alarm is %s!\n", statusString(isAlarmed).c_str());
         inputCredentials(providedCredentials);
 
-        // Find the entry in the database that matches the username, test the PIN and return a status bitflags of how well the authentication went
+        // Find the entry in the database that matches the username, test the password and return a status bitflags of how well the authentication went
         int statusFlags = userLogin(providedCredentials, database, credentialsEntry);
         if((statusFlags & AS_SUCCESS) != 0) // Check if AS_SUCCESS bit is set with AND
         {
@@ -55,7 +59,7 @@ int main(void)
         else
         {
             // Login failed, count a maximum of LOGINATTEMPTS_MAX times in a row and then block and deactivate user
-            fprintf(stderr, "*** Error: Incorrect username or PIN\n");
+            fprintf(stderr, "*** Error: Incorrect username or password\n");
             if(++attemptedLogins >= LOGINATTEMPTS_MAX)
             {
                 fprintf(stderr, "*** Warning: You have been locked out\n");
@@ -70,16 +74,4 @@ int main(void)
     }
 
     return 0;
-}
-
-/*
-    populateDatabase: Add some test entries to the database
-*/
-void populateDatabase(Database& database)
-{
-    database.Add(Credentials("KalleAnka", "3472"));
-    database.Add(Credentials("KajsaAnka", "8985"));
-    database.Add(Credentials("Knatte", "8986"));
-    database.Add(Credentials("Fnatte", "12345"));
-    database.Add(Credentials("Tjatte", "673245"));
 }

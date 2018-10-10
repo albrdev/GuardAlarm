@@ -27,16 +27,16 @@ enum MenuOption
     MO_EXIT = 'q',
     MO_LOGOUT = 'x',
     MO_SETALARM = 'a',
-    MO_CHANGEPIN = 'c'
+    MO_CHANGEPASSWORD = 'c'
 };
 
-int checkPIN(const std::string& providedPIN, const std::string& storedPIN);
+int checkPassword(const std::string& providedPIN, const std::string& storedPIN);
 int userLogin(const Credentials& providedCredentials, Database& database, Credentials*& result);
 
 void emergencyResponse(void);
 
 void inputCredentials(Credentials& credentials);
-bool changePIN(std::string& pin);
+bool changePassword(std::string& pin);
 
 bool configMenu(Credentials* const credentials, bool& isAlarmed);
 void userSession(Credentials* credentials, bool& isAlarmed);

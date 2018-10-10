@@ -2,23 +2,33 @@
 #define _DATABASE_H_
 
 #include <cstdlib>
+#include <fstream>
 #include <vector>
+#include <regex>
 #include "generic.h"
 #include "credentials.h"
 
 class Database
 {
 protected:
-    std::vector<Credentials> m_Content; // Underlying content
+    typedef std::vector<Credentials> container_t;
+    container_t m_Content; // Underlying conten
+    //std::regex regex("([0-9]+);([0-9]{4,6});([a-zA-Z]+);([0-9]*);([1-3]);(.*)");
 
 public:
-    size_t Count(void) const;
+    std::size_t Count(void) const;
     bool Empty(void) const;
     void Add(const Credentials& item);
     void Remove(size_t index);
     void Clear(void);
 
+    Credentials operator [](const std::size_t index) const;
+    Credentials operator [](const std::string& username) const;
+
+    Credentials* FindByID(const int id);
     Credentials* FindByUsername(const std::string& username);
+
+    static bool Load(const std::string& filePath, Database& result);
 
     // Constructors
     Database(void);
