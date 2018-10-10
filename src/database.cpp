@@ -12,6 +12,19 @@ Credentials Database::operator [](const std::size_t index) const
     return m_Content[index];
 }
 
+Credentials Database::operator [](const int id) const
+{
+    for(std::size_t i = 0; i < m_Content.size(); i++)
+    {
+        if(m_Content[i].GetID() == id)
+        {
+            return m_Content[i];
+        }
+    }
+
+    throw;
+}
+
 Credentials Database::operator [](const std::string& username) const
 {
     for(std::size_t i = 0; i < m_Content.size(); i++)

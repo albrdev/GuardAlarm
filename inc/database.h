@@ -21,6 +21,7 @@ public:
     void Clear(void);
 
     Credentials operator [](const std::size_t index) const;
+    Credentials operator [](const int id) const;
     Credentials operator [](const std::string& username) const;
 
     Credentials* FindByID(const int id);

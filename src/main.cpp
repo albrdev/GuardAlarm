@@ -30,6 +30,11 @@ int main(void)
     }
 
     printf("Database successfully loaded %llu entries\n", database.Count());
+    /*for(std::size_t i = 0; i < database.Count(); i++)
+    {
+        std::cout << "  " << database[i] << std::endl;
+    }
+    std::cout << std::endl;*/
 
     int attemptedLogins = 0;
     while(true)
