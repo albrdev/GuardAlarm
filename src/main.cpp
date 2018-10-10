@@ -11,6 +11,7 @@
 int main(void)
 {
     const int LOGINATTEMPTS_MAX = 3; // Uppercase for constants, right?
+    const std::string databaseFilePath = "users.dat";
 
     Database database;
     bool isAlarmed = true;
@@ -22,9 +23,9 @@ int main(void)
         return 1;
     }
 
-    if(!Database::Load("users.dat", database))
+    if(!Database::Load(databaseFilePath, database))
     {
-        fprintf(stderr, "*** Error reading database: %s:%llu\n", "users.dat", database.Count() + 1);
+        fprintf(stderr, "*** Error reading database: %s:%llu\n", databaseFilePath.c_str(), database.Count() + 1);
         return 2;
     }
 
@@ -65,7 +66,7 @@ int main(void)
                 fprintf(stderr, "*** Warning: You have been locked out\n");
                 if(credentialsEntry != NULL) // Could be 'NULL' here (If login failed because we didn't find a user with that name)
                 {
-                    credentialsEntry->SetStatus(UserStatus::Inactive); // Deactivate the account
+                    credentialsEntry->SetStatus(UserStatus::Blocked); // Deactivate the account
                 }
 
                 return -1; // Program exits and could (in the future) save timestamp somewhere safe, to use and refuse to start again under a certain time (to protect from further password-cracking attempts)
