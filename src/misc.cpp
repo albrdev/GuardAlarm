@@ -42,7 +42,7 @@ int userLogin(const Credentials& providedCredentials, Database& database, Creden
 */
 void emergencyResponse(void)
 {
-    printf("[%s] *** Emergency code detected: Notifying the authorities!\n", timeString(time(NULL)).c_str());
+    printf("[%s] *** Emergency code detected: Notifying the authorities!\n", timeString("%H:%M:%S").c_str());
     printf("Loading police, please wait.....\n");
 }
 
@@ -190,7 +190,7 @@ bool configMenu(Credentials* const credentials, bool& isAlarmed)
 void userSession(Credentials* credentials, bool& isAlarmed)
 {
     printf("Alarm is %s!\n", statusString(isAlarmed).c_str());
-    printf("[%s] User \'%s\' logged in\n", timeString(time(NULL)).c_str(), credentials->GetUsername().c_str());
+    printf("[%s] User \'%s\' logged in\n", timeString("%H:%M:%S").c_str(), credentials->GetUsername().c_str());
 
     do
     {
@@ -198,7 +198,7 @@ void userSession(Credentials* credentials, bool& isAlarmed)
         statusString(isAlarmed);
     } while(configMenu(credentials, isAlarmed));
 
-    printf("[%s] User \'%s\' logged out\n\n", timeString(time(NULL)).c_str(), credentials->GetUsername().c_str());
+    printf("[%s] User \'%s\' logged out\n\n", timeString("%H:%M:%S").c_str(), credentials->GetUsername().c_str());
 }
 
 /*

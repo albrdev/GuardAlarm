@@ -1,6 +1,8 @@
 #include <cstdio>
 #include "credentials.h"
 #include "database.h"
+#include "logentry.h"
+#include "logtable.h"
 #include "misc.h"
 
 /*
@@ -12,8 +14,10 @@ int main(void)
 {
     const int LOGINATTEMPTS_MAX = 3;
     const std::string databaseFilePath = "users.dat";
+    const std::string logFilePath = "system.log";
 
     Database database;
+    LogTable logs;
     bool isAlarmed = true;
 
     // Remove buffered output for 'stderr'
@@ -33,6 +37,19 @@ int main(void)
     /*for(std::size_t i = 0; i < database.Count(); i++)
     {
         std::cout << "  " << database[i] << std::endl;
+    }
+    std::cout << std::endl;*/
+
+    if(!LogTable::Load(logFilePath, logs))
+    {
+        fprintf(stderr, "*** Error reading logs: %s:%llu\n", logFilePath.c_str(), logs.Count() + 1);
+        return 2;
+    }
+
+    printf("Logs successfully loaded %llu entries\n", logs.Count());
+    /*for(std::size_t i = 0; i < logs.Count(); i++)
+    {
+        std::cout << "  " << logs[i] << std::endl;
     }
     std::cout << std::endl;*/
 
