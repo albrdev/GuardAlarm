@@ -1,9 +1,9 @@
 #include "logentry.h"
 
-const RegexAssembly LogEntry::c_TimestampRegex("[0-9]{4}[0-9]{2}[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}");
+const RegexAssembly LogEntry::c_TimestampRegex("[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2}");
 const RegexAssembly LogEntry::c_UserIDRegex("[0-9]+");
 const RegexAssembly LogEntry::c_ReservedRegex("[^\\s;]*");
-const RegexAssembly LogEntry::c_MessageRegex("\\S*");
+const RegexAssembly LogEntry::c_MessageRegex("\\S+");
 
 bool LogEntry::ValidateTimestamp(const std::string& value)
 {
