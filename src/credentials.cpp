@@ -1,23 +1,10 @@
 #include "credentials.h"
 
-const RegexAssembly Credentials::c_IDRegex("[0-9]+");
 const RegexAssembly Credentials::c_PasswordRegex("[0-9]{4,6}");
 const RegexAssembly Credentials::c_UsernameRegex("[a-zA-Z]+");
 const RegexAssembly Credentials::c_TagIDRegex("[0-9]*");
 const RegexAssembly Credentials::c_StatusRegex("[1-3]");
 const RegexAssembly Credentials::c_ReservedRegex("\\S*");
-
-int Credentials::s_LastID = -1;
-
-int Credentials::GenerateID(void)
-{
-    return ++s_LastID;
-}
-
-bool Credentials::ValidateID(const std::string& value)
-{
-    return std::regex_match(value, c_IDRegex.GetRegex());
-}
 
 /*
     ValidatePassword: Check if string compiles with password rules
@@ -46,14 +33,12 @@ bool Credentials::ValidateStatus(const std::string& value)
 }
 
 // Get methods (put these on one line to save some space for readability)
-int Credentials::GetID(void) const { return m_ID; }
 std::string Credentials::GetPassword(void) const { return m_Password; }
 std::string Credentials::GetUsername(void) const { return m_Username; }
 int Credentials::GetTagID(void) const { return m_TagID; }
 UserStatus Credentials::GetStatus(void) const { return m_Status; }
 
 // Set methods
-void Credentials::SetID(const int value) { m_ID = value; }
 void Credentials::SetPassword(const std::string& value) { m_Password = value; }
 void Credentials::SetUsername(const std::string& value) { m_Username = value; }
 void Credentials::SetTagID(const int value) { m_TagID = value; }
@@ -79,26 +64,16 @@ std::ostream& operator <<(std::ostream& stream, const Credentials& object)
 }
 
 // Constructors
-Credentials::Credentials(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status)
+Credentials::Credentials(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status) : Entry(id)
 {
-    m_ID = id;
     m_Password = password;
     m_Username = username;
     m_TagID = tagID;
     m_Status = status;
 }
 
-Credentials::Credentials(const int id, const std::string& password, const std::string& username, UserStatus status)
+Credentials::Credentials(const int id, const std::string& password, const std::string& username, UserStatus status) : Entry(id)
 {
-    m_ID = id;
-    m_Password = password;
-    m_Username = username;
-    m_Status = status;
-}
-
-Credentials::Credentials(const std::string& password, const std::string& username, UserStatus status)
-{
-    m_ID = Credentials::GenerateID();
     m_Password = password;
     m_Username = username;
     m_Status = status;
