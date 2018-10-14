@@ -22,6 +22,11 @@ void Database::Add(const Credentials& item) { m_Content.push_back(item); }
 void Database::Remove(std::size_t index) { m_Content.erase(m_Content.begin() + index); }
 void Database::Clear(void) { m_Content.clear(); }
 
+Credentials Database::operator [](const std::size_t index) const
+{
+    return m_Content[index];
+}
+
 Credentials Database::operator [](const int id) const
 {
     for(std::size_t i = 0; i < m_Content.size(); i++)

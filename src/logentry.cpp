@@ -3,7 +3,7 @@
 const RegexAssembly LogEntry::c_TimestampRegex("[0-9]{4}\\.[0-9]{2}\\.[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2}");
 const RegexAssembly LogEntry::c_UserIDRegex("[0-9]+");
 const RegexAssembly LogEntry::c_ReservedRegex("[^\\s;]*");
-const RegexAssembly LogEntry::c_MessageRegex("\\S+");
+const RegexAssembly LogEntry::c_MessageRegex("\\S.+?");
 
 bool LogEntry::ValidateTimestamp(const std::string& value)
 {
@@ -41,7 +41,7 @@ std::string LogEntry::ToString(void) const
     std::ostringstream stream;
     stream << "LogEntry(";
     stream << m_ID << ", ";
-    stream << m_Timestamp << ", ";
+    stream << timeString("%Y.%m.%d %H:%M:%S", m_Timestamp) << ", ";
     stream << m_UserID << ", ";
     stream << m_Message;
     stream << ")";

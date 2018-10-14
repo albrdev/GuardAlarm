@@ -4,6 +4,7 @@
 #include <ctime>
 #include <string>
 #include <sstream>
+#include "generic.h"
 #include "entry.h"
 #include "regexassembly.h"
 

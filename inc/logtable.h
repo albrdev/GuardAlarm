@@ -24,6 +24,7 @@ public:
     void Remove(std::size_t index);
     void Clear(void);
 
+    LogEntry operator [](const std::size_t index) const;
     LogEntry operator [](const int id) const;
 
     LogEntry* FindByID(const int id);

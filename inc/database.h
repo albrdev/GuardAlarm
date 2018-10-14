@@ -25,6 +25,7 @@ public:
     void Remove(std::size_t index);
     void Clear(void);
 
+    Credentials operator [](const std::size_t index) const;
     Credentials operator [](const int id) const;
 
     Credentials* FindByID(const int id);

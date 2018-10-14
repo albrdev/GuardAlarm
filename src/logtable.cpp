@@ -1,7 +1,7 @@
 #include "logtable.h"
 
 // Regex explanation:
-// ^\s*([0-9]+)\s*;\s*([0-9]{4}\.[0-9]{2}\.[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\s*;\s*([0-9]+)\s*;\s*([^\s;]*)\s*;\s*(\S+)\s*$
+// ^\s*([0-9]+)\s*;\s*([0-9]{4}\.[0-9]{2}\.[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\s*;\s*([0-9]+)\s*;\s*([^\s;]*)\s*;\s*(\S.+?)\s*$
 //
 // ^ = Match the start of the string.
 // $ = Match the end of the string
@@ -12,14 +12,19 @@
 // ([0-9]{4}\.[0-9]{2}\.[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2}) = For the second field (Timestamp); match any base-10 digit, 4 times, 2 times and 2 times, separated by dots (this is the date). match any base-10 digit, 2 times, 2 times and 2 times, separated by semicolons (this is the time).
 // ([0-9]+) = For the third field (UserID); match any base-10 digit, one or more times.
 // ([^\s;]*) = For the fourth field (Reserved); match any character that is not whitespace nor a semicolon, zero or more times (this field could later be ignored).
-// (\S*) = For the fifth field (Message); match any non-whitespace character, one or more times (max length is checked later).
-const RegexAssembly LogTable::c_CSVRegex("^\\s*([0-9]+)\\s*;\\s*([0-9]{4}\\.[0-9]{2}\\.[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\\s*;\\s*([0-9]+)\\s*;\\s*([^\\s;]*)\\s*;\\s*(\\S+)\\s*$");
+// (\S.+?) = For the fifth field (Message); match any non-whitespace character, one or more times (max length is checked later).
+const RegexAssembly LogTable::c_CSVRegex("^\\s*([0-9]+)\\s*;\\s*([0-9]{4}\\.[0-9]{2}\\.[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\\s*;\\s*([0-9]+)\\s*;\\s*([^\\s;]*)\\s*;\\s*(\\S.+?)\\s*$");
 
 std::size_t LogTable::Count(void) const { return m_Content.size(); }
 bool LogTable::Empty(void) const { return m_Content.empty(); }
 void LogTable::Add(const LogEntry& item) { m_Content.push_back(item); }
 void LogTable::Remove(std::size_t index) { m_Content.erase(m_Content.begin() + index); }
 void LogTable::Clear(void) { m_Content.clear(); }
+
+LogEntry LogTable::operator [](const std::size_t index) const
+{
+    return m_Content[index];
+}
 
 LogEntry LogTable::operator [](const int id) const
 {
