@@ -3,10 +3,11 @@
 // Regex explanation:
 // ^\s*([0-9]+)\s*;\s*([0-9]{4,6})\s*;\s*([a-zA-Z]+)\s*;\s*([0-9]*)\s*;\s*([1-3])\s*;\s*(\S*)\s*$
 //
-// ^ = Match the start of a string.
-// $ = Match the end of a string
+// ^ = Match the start of the string.
+// $ = Match the end of the string
 // \s* = Match any number of whitespace between value fields (allowing for possible (and unnecessary) spaces in between).
 // ; = Match the literal comma that separates the fields.
+
 // ([0-9]+) = For the first field (ID); match any base-10 digit, one or more times.
 // ([0-9]{4,6}) = For the second field (Password); match any base-10 digit, 4-6 times.
 // ([a-zA-Z]+) = For the third field (Username); match any letter from a-z, upper- and lowercase, one or more times.

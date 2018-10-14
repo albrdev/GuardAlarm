@@ -3,8 +3,8 @@
 // Regex explanation:
 // ^\s*([0-9]+)\s*;\s*([0-9]{4}\.[0-9]{2}\.[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\s*;\s*([0-9]+)\s*;\s*([^\s;]*)\s*;\s*(\S+)\s*$
 //
-// ^ = Match the start of a string.
-// $ = Match the end of a string
+// ^ = Match the start of the string.
+// $ = Match the end of the string
 // \s* = Match any number of whitespace between value fields (allowing for possible (and unnecessary) spaces in between).
 // ; = Match the literal comma that separates the fields.
 
