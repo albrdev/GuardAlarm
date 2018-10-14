@@ -78,7 +78,7 @@ void inputCredentials(Credentials& credentials)
                 break;
             }
 
-            credentials = Credentials(username, password);
+            credentials = Credentials(-1, username, password);
         } while(false);
     }
 }
