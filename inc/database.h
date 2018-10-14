@@ -22,12 +22,10 @@ public:
     std::size_t Count(void) const;
     bool Empty(void) const;
     void Add(const Credentials& item);
-    void Remove(size_t index);
+    void Remove(std::size_t index);
     void Clear(void);
 
-    Credentials operator [](const std::size_t index) const;
     Credentials operator [](const int id) const;
-    Credentials operator [](const std::string& username) const;
 
     Credentials* FindByID(const int id);
     Credentials* FindByUsername(const std::string& username);

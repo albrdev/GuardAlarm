@@ -1,6 +1,5 @@
 #include "database.h"
 
-// Use Credential's regexes to generate one for the entire CSV line.
 // Regex explanation:
 // ^\s*([0-9]+)\s*;\s*([0-9]{4,6})\s*;\s*([a-zA-Z]+)\s*;\s*([0-9]*)\s*;\s*([1-3])\s*;\s*(\S*)\s*$
 //
@@ -13,38 +12,20 @@
 // ([a-zA-Z]+) = For the third field (Username); match any letter from a-z, upper- and lowercase, one or more times.
 // ([0-9]*) = For the fourth field (TagID); match any base-10 digit, zero or more times (this field is optional).
 // ([1-3]) = For the fifth field (Status); match any number from 1-3, one single time
-// (\S*) = For the sixth field (Reserved); match any non-whitespace character, zero or more times (this field could be ignored).
+// (\S*) = For the sixth field (Reserved); match any non-whitespace character, zero or more times (this field could later be ignored).
 const RegexAssembly Database::c_CSVRegex("^\\s*([0-9]+)\\s*;\\s*([0-9]{4,6})\\s*;\\s*([a-zA-Z]+)\\s*;\\s*([0-9]*)\\s*;\\s*([1-3])\\s*;\\s*(\\S*)\\s*$");
 
 std::size_t Database::Count(void) const { return m_Content.size(); }
 bool Database::Empty(void) const { return m_Content.empty(); }
 void Database::Add(const Credentials& item) { m_Content.push_back(item); }
-void Database::Remove(size_t index) { m_Content.erase(m_Content.begin() + index); }
+void Database::Remove(std::size_t index) { m_Content.erase(m_Content.begin() + index); }
 void Database::Clear(void) { m_Content.clear(); }
-
-Credentials Database::operator [](const std::size_t index) const
-{
-    return m_Content[index];
-}
 
 Credentials Database::operator [](const int id) const
 {
     for(std::size_t i = 0; i < m_Content.size(); i++)
     {
         if(m_Content[i].GetID() == id)
-        {
-            return m_Content[i];
-        }
-    }
-
-    throw;
-}
-
-Credentials Database::operator [](const std::string& username) const
-{
-    for(std::size_t i = 0; i < m_Content.size(); i++)
-    {
-        if(strcmpic(m_Content[i].GetUsername(), username) == 0)
         {
             return m_Content[i];
         }
