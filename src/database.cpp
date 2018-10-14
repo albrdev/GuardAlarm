@@ -14,7 +14,7 @@
 // ([0-9]*) = For the fourth field (TagID); match any base-10 digit, zero or more times (this field is optional).
 // ([1-3]) = For the fifth field (Status); match any number from 1-3, one single time
 // (\S*) = For the sixth field (Reserved); match any non-whitespace character, zero or more times (this field could be ignored).
-const RegexAssembly Database::c_CSVRegex("^\\s*(" + Credentials::c_IDRegex.GetPattern() + ")\\s*;\\s*" + "(" + Credentials::c_PasswordRegex.GetPattern() + ")\\s*;\\s*" + "(" + Credentials::c_UsernameRegex.GetPattern() + ")\\s*;\\s*" + "(" + Credentials::c_TagIDRegex.GetPattern() + ")\\s*;\\s*" + "(" + Credentials::c_StatusRegex.GetPattern() + ")\\s*;\\s*" + "(" + Credentials::c_ReservedRegex.GetPattern() + ")\\s*$");
+const RegexAssembly Database::c_CSVRegex("^\\s*([0-9]+)\\s*;\\s*([0-9]{4,6})\\s*;\\s*([a-zA-Z]+)\\s*;\\s*([0-9]*)\\s*;\\s*([1-3])\\s*;\\s*(\\S*)\\s*$");
 
 std::size_t Database::Count(void) const { return m_Content.size(); }
 bool Database::Empty(void) const { return m_Content.empty(); }
