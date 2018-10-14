@@ -12,5 +12,6 @@ bool readChar(char& result);
 int strcmpic(const std::string& a, const std::string& b);
 
 std::string timeString(time_t t);
+std::time_t strtotime(const char *const str);
 
 #endif // _GENERIC_H_

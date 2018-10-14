@@ -66,3 +66,16 @@ std::string timeString(time_t t)
     strftime(timeStringBuffer, sizeof(timeStringBuffer), "%H:%M:%S", timeInfo);
     return timeStringBuffer;
 }
+
+std::time_t strtotime(const char *const str)
+{
+    struct tm ts = { };
+    if(std::sscanf(str, "%4d.%2d.%2d %2d:%2d:%2d", &ts.tm_year, &ts.tm_mon, &ts.tm_mday, &ts.tm_hour, &ts.tm_min, &ts.tm_sec) != 6)
+    {
+        return (std::time_t) - 1;
+    }
+
+    ts.tm_year -= 1900;
+    ts.tm_mon -= 1;
+    return std::mktime(&ts);
+}
