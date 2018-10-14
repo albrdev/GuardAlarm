@@ -57,19 +57,27 @@ int strcmpic(const std::string& a, const std::string& b)
 
 /*
     timeString: Generates a human readable string representing the time provided by the parameter
-                Time format will be in HH:MM:SS
 */
-std::string timeString(time_t t)
+std::string timeString(const std::string& format, const time_t value)
 {
-    char timeStringBuffer[9]; // A maximum of 8 + 1 ('\0') characters will be written
-    struct tm* timeInfo = localtime(&t);
-    strftime(timeStringBuffer, sizeof(timeStringBuffer), "%H:%M:%S", timeInfo);
+    char timeStringBuffer[256 + 1];
+    struct tm* timeInfo = localtime(&value);
+    strftime(timeStringBuffer, sizeof(timeStringBuffer), format.c_str(), timeInfo);
+    return timeStringBuffer;
+}
+
+std::string timeString(const std::string& format)
+{
+    char timeStringBuffer[256 + 1];
+    time_t value = time(NULL);
+    struct tm* timeInfo = localtime(&value);
+    strftime(timeStringBuffer, sizeof(timeStringBuffer), format.c_str(), timeInfo);
     return timeStringBuffer;
 }
 
 std::time_t strtotime(const char *const str)
 {
-    struct tm ts = { };
+    struct tm ts = { 0, 0, 0, 0, 0, 0, 0, 0, -1 };
     if(std::sscanf(str, "%4d.%2d.%2d %2d:%2d:%2d", &ts.tm_year, &ts.tm_mon, &ts.tm_mday, &ts.tm_hour, &ts.tm_min, &ts.tm_sec) != 6)
     {
         return (std::time_t) - 1;
