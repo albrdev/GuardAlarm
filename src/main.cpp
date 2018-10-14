@@ -10,7 +10,7 @@
 
 int main(void)
 {
-    const int LOGINATTEMPTS_MAX = 3; // Uppercase for constants, right?
+    const int LOGINATTEMPTS_MAX = 3;
     const std::string databaseFilePath = "users.dat";
 
     Database database;

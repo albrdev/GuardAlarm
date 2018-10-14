@@ -5,13 +5,18 @@
 #include <fstream>
 #include <vector>
 #include "generic.h"
+#include "regexassembly.h"
 #include "credentials.h"
 
 class Database
 {
 protected:
+    static const RegexAssembly c_CSVRegex;
+
     typedef std::vector<Credentials> container_t;
-    container_t m_Content; // Underlying conten
+    container_t m_Content; // Underlying content
+
+    static bool ParseCSV(const std::string& value, Credentials& result);
 
 public:
     std::size_t Count(void) const;
