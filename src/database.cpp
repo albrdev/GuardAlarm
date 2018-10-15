@@ -16,28 +16,18 @@
 // (\S*) = For the sixth field (Reserved); match any non-whitespace character, zero or more times (this field could later be ignored).
 const RegexAssembly Database::c_CSVRegex("^\\s*([0-9]+)\\s*;\\s*([0-9]{4,6})\\s*;\\s*([a-zA-Z]+)\\s*;\\s*([0-9]*)\\s*;\\s*([1-3])\\s*;\\s*(\\S*)\\s*$");
 
-std::size_t Database::Count(void) const { return m_Content.size(); }
-bool Database::Empty(void) const { return m_Content.empty(); }
-void Database::Add(const Credentials& item) { m_Content.push_back(item); }
-void Database::Remove(std::size_t index) { m_Content.erase(m_Content.begin() + index); }
-void Database::Clear(void) { m_Content.clear(); }
-
-Credentials Database::operator [](const std::size_t index) const
+bool Database::FindByID(const int id, Credentials& result)
 {
-    return m_Content[index];
-}
-
-Credentials Database::operator [](const int id) const
-{
-    for(std::size_t i = 0; i < m_Content.size(); i++)
+    for(size_t i = 0; i < m_Content.size(); i++)
     {
         if(m_Content[i].GetID() == id)
         {
-            return m_Content[i];
+            result = m_Content[i];
+            return true;
         }
     }
 
-    throw;
+    return false;
 }
 
 Credentials* Database::FindByID(const int id)
@@ -57,6 +47,20 @@ Credentials* Database::FindByID(const int id)
     Database::FindByUsername: Find entry that matches 'username'
                               Return pointer to the matched entry in the database, or 'NULL' if no entry could be found
 */
+bool Database::FindByUsername(const std::string& username, Credentials& result)
+{
+    for(size_t i = 0; i < m_Content.size(); i++)
+    {
+        if(strcmpic(m_Content[i].GetUsername(), username) == 0)
+        {
+            result = m_Content[i];
+            return true;
+        }
+    }
+
+    return false;
+}
+
 Credentials* Database::FindByUsername(const std::string& username)
 {
     for(size_t i = 0; i < m_Content.size(); i++)

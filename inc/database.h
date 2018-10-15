@@ -5,30 +5,21 @@
 #include <fstream>
 #include <vector>
 #include "generic.h"
-#include "regexassembly.h"
+#include "table.h"
 #include "credentials.h"
+#include "regexassembly.h"
 
-class Database
+class Database : public Table<Credentials>
 {
 protected:
     static const RegexAssembly c_CSVRegex;
 
-    typedef std::vector<Credentials> container_t;
-    container_t m_Content; // Underlying content
-
     static bool ParseCSV(const std::string& value, Credentials& result);
 
 public:
-    std::size_t Count(void) const;
-    bool Empty(void) const;
-    void Add(const Credentials& item);
-    void Remove(std::size_t index);
-    void Clear(void);
-
-    Credentials operator [](const std::size_t index) const;
-    Credentials operator [](const int id) const;
-
+    bool FindByID(const int id, Credentials& result);
     Credentials* FindByID(const int id);
+    bool FindByUsername(const std::string& username, Credentials& result);
     Credentials* FindByUsername(const std::string& username);
 
     static bool Load(const std::string& filePath, Database& result);

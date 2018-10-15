@@ -15,28 +15,18 @@
 // (\S.+?) = For the fifth field (Message); match any non-whitespace character, one or more times (max length is checked later).
 const RegexAssembly LogTable::c_CSVRegex("^\\s*([0-9]+)\\s*;\\s*([0-9]{4}\\.[0-9]{2}\\.[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\\s*;\\s*([0-9]+)\\s*;\\s*([^\\s;]*)\\s*;\\s*(\\S.+?)\\s*$");
 
-std::size_t LogTable::Count(void) const { return m_Content.size(); }
-bool LogTable::Empty(void) const { return m_Content.empty(); }
-void LogTable::Add(const LogEntry& item) { m_Content.push_back(item); }
-void LogTable::Remove(std::size_t index) { m_Content.erase(m_Content.begin() + index); }
-void LogTable::Clear(void) { m_Content.clear(); }
-
-LogEntry LogTable::operator [](const std::size_t index) const
+bool LogTable::FindByID(const int id, LogEntry& result)
 {
-    return m_Content[index];
-}
-
-LogEntry LogTable::operator [](const int id) const
-{
-    for(std::size_t i = 0; i < m_Content.size(); i++)
+    for(size_t i = 0; i < m_Content.size(); i++)
     {
         if(m_Content[i].GetID() == id)
         {
-            return m_Content[i];
+            result = m_Content[i];
+            return true;
         }
     }
 
-    throw;
+    return false;
 }
 
 LogEntry* LogTable::FindByID(const int id)
