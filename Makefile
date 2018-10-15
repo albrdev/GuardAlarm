@@ -14,7 +14,7 @@ CMD_RM    = rm -f
 CMD_LN    = ln -sf
 CMD_PRINT = @printf
 
-OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/regexassembly.o $(DIR_OBJ)/entry.o $(DIR_OBJ)/credentials.o $(DIR_OBJ)/logentry.o $(DIR_OBJ)/database.o $(DIR_OBJ)/logtable.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
+OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/regexassembly.o $(DIR_OBJ)/entry.o $(DIR_OBJ)/credentials.o $(DIR_OBJ)/logentry.o $(DIR_OBJ)/table.o $(DIR_OBJ)/database.o $(DIR_OBJ)/logtable.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
 
 .PHONY: all
 all: $(DIR_BIN)/$(BIN)
@@ -39,6 +39,9 @@ $(DIR_OBJ)/logtable.o: $(DIR_SRC)/logtable.cpp $(DIR_INC)/logtable.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
   
 $(DIR_OBJ)/database.o: $(DIR_SRC)/database.cpp $(DIR_INC)/database.h
+	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
+
+$(DIR_OBJ)/table.o: $(DIR_SRC)/table.cpp $(DIR_INC)/table.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
 $(DIR_OBJ)/logentry.o: $(DIR_SRC)/logentry.cpp $(DIR_INC)/logentry.h
