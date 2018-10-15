@@ -10,6 +10,15 @@
     I be consistent I would have changed the input too to some C function, like scanf, but I didn't have time, so I keep std::cin
 */
 
+template<typename T> void print(const Table<T>& table)
+{
+    for(std::size_t i = 0; i < table.Count(); i++)
+    {
+        std::cout << "  " << table[i].ToString() << std::endl;
+    }
+    std::cout << std::endl;
+}
+
 int main(void)
 {
     const int LOGINATTEMPTS_MAX = 3;
@@ -34,11 +43,7 @@ int main(void)
     }
 
     printf("Database successfully loaded %llu entries\n", database.Count());
-    /*for(std::size_t i = 0; i < database.Count(); i++)
-    {
-        std::cout << "  " << database[i] << std::endl;
-    }
-    std::cout << std::endl;*/
+    //print(database);
 
     if(!LogTable::Load(logFilePath, logs))
     {
@@ -47,11 +52,7 @@ int main(void)
     }
 
     printf("Logs successfully loaded %llu entries\n", logs.Count());
-    /*for(std::size_t i = 0; i < logs.Count(); i++)
-    {
-        std::cout << "  " << logs[i] << std::endl;
-    }
-    std::cout << std::endl;*/
+    //print(logs);
 
     int attemptedLogins = 0;
     while(true)

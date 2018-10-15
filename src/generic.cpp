@@ -58,7 +58,7 @@ int strcmpic(const std::string& a, const std::string& b)
 /*
     timeString: Generates a human readable string representing the time provided by the parameter
 */
-std::string timeString(const std::string& format, const time_t value)
+std::string timetostr(const std::string& format, const time_t value)
 {
     char timeStringBuffer[256 + 1];
     struct tm* timeInfo = localtime(&value);
@@ -66,7 +66,7 @@ std::string timeString(const std::string& format, const time_t value)
     return timeStringBuffer;
 }
 
-std::string timeString(const std::string& format)
+std::string timetostr(const std::string& format)
 {
     char timeStringBuffer[256 + 1];
     time_t value = time(NULL);
@@ -87,3 +87,40 @@ std::time_t strtotime(const char *const str)
     ts.tm_mon -= 1;
     return std::mktime(&ts);
 }
+
+template<typename T> std::string ToString(const T& value)
+{
+    std::ostringstream oss;
+    oss << value;
+    return oss.str();
+}
+
+template<typename T> T FromString(const std::string& str)
+{
+    std::istringstream iss(str);
+    T ret;
+    iss >> ret;
+    return ret;
+}
+
+template<typename T> bool FromString(const std::string& str, T& result)
+{
+    std::istringstream iss(str);
+    iss >> result;
+    return !iss.fail();
+}
+
+/*template<typename...P> void vtspf_priv(std::string &s) {}
+
+template<typename H, typename...P> void vtspf_priv(std::string &s, H h, P...p)
+{
+    s += type_to_string(h);
+    vtspf_priv(s, p...);
+}
+
+template<typename...P> std::string temp_vtspf(P...p)
+{
+    std::string s("");
+    vtspf_priv(s, p...);
+    return s;
+}*/
