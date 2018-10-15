@@ -23,7 +23,7 @@ bool LogEntry::ValidateUserID(const std::string& value)
 */
 bool LogEntry::ValidateMessage(const std::string& value)
 {
-    return std::regex_match(value, c_MessageRegex.GetRegex());
+    return value.length <= 100 && std::regex_match(value, c_MessageRegex.GetRegex());
 }
 
 // Get methods (put these on one line to save some space for readability)
