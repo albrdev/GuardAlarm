@@ -109,18 +109,3 @@ template<typename T> bool FromString(const std::string& str, T& result)
     iss >> result;
     return !iss.fail();
 }
-
-/*template<typename...P> void vtspf_priv(std::string &s) {}
-
-template<typename H, typename...P> void vtspf_priv(std::string &s, H h, P...p)
-{
-    s += type_to_string(h);
-    vtspf_priv(s, p...);
-}
-
-template<typename...P> std::string temp_vtspf(P...p)
-{
-    std::string s("");
-    vtspf_priv(s, p...);
-    return s;
-}*/
