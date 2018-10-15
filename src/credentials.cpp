@@ -4,7 +4,7 @@ const RegexAssembly Credentials::c_PasswordRegex("[0-9]{4,6}");
 const RegexAssembly Credentials::c_UsernameRegex("[a-zA-Z]+");
 const RegexAssembly Credentials::c_TagIDRegex("[0-9]*");
 const RegexAssembly Credentials::c_StatusRegex("[1-3]");
-const RegexAssembly Credentials::c_ReservedRegex("\\S*");
+const RegexAssembly Credentials::c_ReservedRegex("[^\\s;]*");
 
 /*
     ValidatePassword: Check if string compiles with password rules
