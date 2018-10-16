@@ -5,6 +5,9 @@
 #include <fstream>
 #include "logentry.h"
 
+/*
+    Class used for writing logs and automatically closes the file
+*/
 class Logger
 {
 protected:

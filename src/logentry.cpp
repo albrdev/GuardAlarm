@@ -7,11 +7,17 @@ const RegexAssembly LogEntry::c_UserIDRegex("[0-9]+");
 const RegexAssembly LogEntry::c_ReservedRegex("[^\\s;]*");
 const RegexAssembly LogEntry::c_MessageRegex("\\S.+?");
 
+/*
+    GetNextID: Gets next available ID using an underlying static integer that keeps track of the highest ID + 1
+*/
 int LogEntry::GetNextID(void)
 {
     return s_NextID++;
 }
 
+/*
+    ValidateTimestamp: Check if string compiles with valid timestamp format
+*/
 bool LogEntry::ValidateTimestamp(const std::string& value)
 {
     return std::regex_match(value, c_TimestampRegex.GetRegex());

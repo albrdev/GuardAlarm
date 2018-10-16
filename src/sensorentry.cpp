@@ -4,6 +4,9 @@ int SensorEntry::s_NextID = 0;
 
 const RegexAssembly SensorEntry::c_StatusRegex("-1|[0-1]");
 
+/*
+    GetNextID: Gets next available ID using an underlying static integer that keeps track of the highest ID + 1
+*/
 int SensorEntry::GetNextID(void)
 {
     return s_NextID++;

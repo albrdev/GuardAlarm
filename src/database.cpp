@@ -87,6 +87,9 @@ Credentials* Database::FindByPassword(const std::string& password)
     return NULL;
 }
 
+/*
+    FindBySecondaryPassword: Finds an entry by comparing against secondary (emergency) password
+*/
 Credentials* Database::FindBySecondaryPassword(const std::string& password)
 {
     for(size_t i = 0; i < m_Content.size(); i++)
@@ -100,14 +103,18 @@ Credentials* Database::FindBySecondaryPassword(const std::string& password)
     return NULL;
 }
 
+/*
+    ParseCSV: Split a string line into fields and convert them into correct type and put them in a Credentials object
+*/
 bool Database::ParseCSV(const std::string& value, Credentials& result)
 {
     std::smatch match;
-    if(!c_CSVRegex.Match(value, match))
+    if(!c_CSVRegex.Match(value, match)) // If regex fails, there was an error on some value field, every field in the line must succeed.
     {
         return false;
     }
 
+    // Index 0 contains the entire line, so we begin at 1, these are the fields read in order accoring to the regex.
     result = Credentials(std::stoi(match[1]), match[2], match[3], (UserStatus)std::stoi(match[5]));
     if(!((std::string)match[4]).empty())
     {
@@ -117,6 +124,10 @@ bool Database::ParseCSV(const std::string& value, Credentials& result)
     return true;
 }
 
+/*
+    GetNextID:  Attempts to read all the entries in a file, skipping empty lines and handles spaces between value fields.
+                If there's a paring error of a field, the line is discarded and function returns 'false'.
+*/
 bool Database::Load(const std::string& filePath, Database& result)
 {
     std::fstream stream(filePath, std::ifstream::in);
@@ -125,37 +136,37 @@ bool Database::Load(const std::string& filePath, Database& result)
         return false;
     }
 
-    int highestID = std::numeric_limits<int>().min();
+    int highestID = std::numeric_limits<int>().min(); // Let's find the highest ID while we are iterating through the entries
     std::string line;
     while(std::getline(stream, line))
     {
-        if(line.empty())
+        if(line.empty()) // We don't want to attempt to read harmless empty lines, continue the to next line
         {
             continue;
         }
 
         Credentials entry;
-        if(!Database::ParseCSV(line, entry))
+        if(!Database::ParseCSV(line, entry)) // Try to parse the line using regex
         {
             stream.close();
             return false;
         }
 
-        result.Add(entry);
+        result.Add(entry); // Entry read successfully, save it
         if(entry.GetID() > highestID)
         {
-            highestID = entry.GetID();
+            highestID = entry.GetID(); // This will ensure we'll get the highest ID of all entries
         }
     }
 
-    if(stream.bad())
+    if(stream.bad()) // There was a error in reading the file (maybe bad sector, harddrive was unplugged or whatever)
     {
         stream.close();
         return false;
     }
 
     stream.close();
-    Credentials::s_NextID = highestID + 1;
+    Credentials::s_NextID = highestID + 1; // Set the static integer that keeps track of the next available ID
     return true;
 }
 

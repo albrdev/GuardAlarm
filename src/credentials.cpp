@@ -8,6 +8,9 @@ const RegexAssembly Credentials::c_TagIDRegex("[0-9]*");
 const RegexAssembly Credentials::c_StatusRegex("[1-3]");
 const RegexAssembly Credentials::c_ReservedRegex("[^\\s;]*");
 
+/*
+    GetNextID: Gets next available ID using an underlying static integer that keeps track of the highest ID + 1
+*/
 int Credentials::GetNextID(void)
 {
     return s_NextID++;
