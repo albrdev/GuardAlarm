@@ -4,7 +4,7 @@
 // ^\s*([0-9]+)\s*;\s*([0-9]{4,6})\s*;\s*([a-zA-Z]+)\s*;\s*([0-9]*)\s*;\s*([1-3])\s*;\s*(\S*)\s*$
 //
 // ^ = Match the start of the string.
-// $ = Match the end of the string
+// $ = Match the end of the string.
 // \s* = Match any number of whitespace between value fields (allowing for possible (and unnecessary) spaces in between).
 // ; = Match the literal comma that separates the fields.
 
@@ -12,7 +12,7 @@
 // ([0-9]{4,6}) = For the second field (Password); match any base-10 digit, 4-6 times.
 // ([a-zA-Z]+) = For the third field (Username); match any letter from a-z, upper- and lowercase, one or more times.
 // ([0-9]*) = For the fourth field (TagID); match any base-10 digit, zero or more times (this field is optional).
-// ([1-3]) = For the fifth field (Status); match any number from 1-3, one single time
+// ([1-3]) = For the fifth field (Status); match 1, 2 or 3, one single time.
 // ([^\\s;]*) = For the sixth field (Reserved); match any non-whitespace character, zero or more times (this field could later be ignored).
 const RegexAssembly Database::c_CSVRegex("^\\s*([0-9]+)\\s*;\\s*([0-9]{4,6})\\s*;\\s*([a-zA-Z]+)\\s*;\\s*([0-9]*)\\s*;\\s*([1-3])\\s*;\\s*([^\\s;]*)\\s*$");
 
@@ -74,6 +74,32 @@ Credentials* Database::FindByUsername(const std::string& username)
     return NULL;
 }
 
+Credentials* Database::FindByPassword(const std::string& password)
+{
+    for(size_t i = 0; i < m_Content.size(); i++)
+    {
+        if(strcmpic(m_Content[i].GetPassword(), password) == 0)
+        {
+            return &m_Content[i];
+        }
+    }
+
+    return NULL;
+}
+
+Credentials* Database::FindBySecondaryPassword(const std::string& password)
+{
+    for(size_t i = 0; i < m_Content.size(); i++)
+    {
+        if(strcmpic(m_Content[i].GetSecondaryPassword(), password) == 0)
+        {
+            return &m_Content[i];
+        }
+    }
+
+    return NULL;
+}
+
 bool Database::ParseCSV(const std::string& value, Credentials& result)
 {
     std::smatch match;
@@ -99,6 +125,7 @@ bool Database::Load(const std::string& filePath, Database& result)
         return false;
     }
 
+    int highestID = std::numeric_limits<int>().min();
     std::string line;
     while(std::getline(stream, line))
     {
@@ -115,6 +142,10 @@ bool Database::Load(const std::string& filePath, Database& result)
         }
 
         result.Add(entry);
+        if(entry.GetID() > highestID)
+        {
+            highestID = entry.GetID();
+        }
     }
 
     if(stream.bad())
@@ -124,6 +155,7 @@ bool Database::Load(const std::string& filePath, Database& result)
     }
 
     stream.close();
+    Credentials::s_NextID = highestID + 1;
     return true;
 }
 

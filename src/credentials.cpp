@@ -1,10 +1,17 @@
 #include "credentials.h"
 
+int Credentials::s_NextID = 0;
+
 const RegexAssembly Credentials::c_PasswordRegex("[0-9]{4,6}");
 const RegexAssembly Credentials::c_UsernameRegex("[a-zA-Z]+");
 const RegexAssembly Credentials::c_TagIDRegex("[0-9]*");
 const RegexAssembly Credentials::c_StatusRegex("[1-3]");
 const RegexAssembly Credentials::c_ReservedRegex("[^\\s;]*");
+
+int Credentials::GetNextID(void)
+{
+    return s_NextID++;
+}
 
 /*
     ValidatePassword: Check if string compiles with password rules
@@ -38,11 +45,32 @@ std::string Credentials::GetUsername(void) const { return m_Username; }
 int Credentials::GetTagID(void) const { return m_TagID; }
 UserStatus Credentials::GetStatus(void) const { return m_Status; }
 
+std::string Credentials::GetSecondaryPassword() const
+{
+    std::string temp = m_Password;
+    size_t lastIndex = temp.length() - 1;
+    temp[lastIndex] = (temp[lastIndex] == '9' ? '0' : (char)(temp[lastIndex] + 1));
+    return temp;
+}
+
 // Set methods
 void Credentials::SetPassword(const std::string& value) { m_Password = value; }
 void Credentials::SetUsername(const std::string& value) { m_Username = value; }
 void Credentials::SetTagID(const int value) { m_TagID = value; }
 void Credentials::SetStatus(const UserStatus value) { m_Status = value; }
+
+std::string Credentials::ToCSVString(void) const
+{
+    std::ostringstream stream;
+    stream << m_ID << ';';
+    stream << m_Password << ';';
+    stream << m_Username << ';';
+    stream << m_TagID << ';';
+    stream << m_Status << ';';
+    stream << ""; // Reserved
+
+    return stream.str();
+}
 
 std::string Credentials::ToString(void) const
 {
@@ -64,15 +92,29 @@ std::ostream& operator <<(std::ostream& stream, const Credentials& object)
 }
 
 // Constructors
-Credentials::Credentials(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status) : Entry(id)
+Credentials::Credentials(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status) : Credentials(id, password, username, status)
 {
-    m_Password = password;
-    m_Username = username;
     m_TagID = tagID;
-    m_Status = status;
 }
 
 Credentials::Credentials(const int id, const std::string& password, const std::string& username, UserStatus status) : Entry(id)
+{
+    m_Password = password;
+    m_Username = username;
+    m_Status = status;
+
+    if(id > s_NextID)
+    {
+        s_NextID = id + 1;
+    }
+}
+
+Credentials::Credentials(const std::string& password, const std::string& username, const int tagID, UserStatus status) : Credentials(password, username, status)
+{
+    m_TagID = tagID;
+}
+
+Credentials::Credentials(const std::string& password, const std::string& username, UserStatus status) : Entry(GetNextID())
 {
     m_Password = password;
     m_Username = username;

@@ -22,6 +22,8 @@ class Credentials : public Entry
 private:
     friend std::ostream& operator <<(std::ostream& stream, const Credentials& object);
 
+    static int s_NextID;
+
 protected:
     // Member variables, protected from outside interventions
     static const RegexAssembly c_PasswordRegex;
@@ -35,6 +37,8 @@ protected:
     int m_TagID = -1;
     UserStatus m_Status = UserStatus::Inactive;
 
+    static int GetNextID(void);
+
 public:
     // Static methods to check if a string complies with the rules for Username/Password etc.
     static bool ValidatePassword(const std::string& value);
@@ -47,6 +51,7 @@ public:
     std::string GetUsername(void) const; // Methods with 'const' at the end indicates that it doesn't affect the object (member variables) in any way
     int GetTagID(void) const;
     UserStatus GetStatus(void) const;
+    std::string GetSecondaryPassword() const;
 
     // Set methods
     void SetPassword(const std::string& value);
@@ -54,11 +59,14 @@ public:
     void SetTagID(const int value);
     void SetStatus(const UserStatus value);
 
+    virtual std::string ToCSVString(void) const;
     virtual std::string ToString(void) const override;
 
     // Constructors
     Credentials(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status = UserStatus::Active); // Variable 'active' har a defualt value of 'true', if not specified explicitly
     Credentials(const int id, const std::string& password, const std::string& username, UserStatus status = UserStatus::Active);
+    Credentials(const std::string& password, const std::string& username, const int tagID, UserStatus status);
+    Credentials(const std::string& password, const std::string& username, UserStatus status);
     Credentials(void);
 };
 

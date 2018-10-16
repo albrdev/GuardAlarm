@@ -10,8 +10,12 @@
 
 class LogEntry : public Entry
 {
+    friend class LogTable;
+
 private:
     friend std::ostream& operator <<(std::ostream& stream, const LogEntry& object);
+
+    static int s_NextID;
 
 protected:
     // Member variables, protected from outside interventions
@@ -23,6 +27,8 @@ protected:
     std::time_t m_Timestamp = 0;
     int m_UserID = -1;
     std::string m_Message = "";
+
+    static int GetNextID(void);
 
 public:
     // Static methods to check if a string complies with the rules for Username/PIN
@@ -40,10 +46,12 @@ public:
     void SetUserID(const int value);
     void SetMessage(const std::string& value);
 
+    virtual std::string ToCSVString(void) const;
     virtual std::string ToString(void) const override;
 
     // Constructors
     LogEntry(const int id, const std::time_t timestamp, const int userID, const std::string& message);
+    LogEntry(const std::time_t timestamp, const int userID, const std::string& message);
     LogEntry(void);
 };
 

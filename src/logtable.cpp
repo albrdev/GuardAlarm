@@ -4,7 +4,7 @@
 // ^\s*([0-9]+)\s*;\s*([0-9]{4}\.[0-9]{2}\.[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\s*;\s*([0-9]+)\s*;\s*([^\s;]*)\s*;\s*(\S.+?)\s*$
 //
 // ^ = Match the start of the string.
-// $ = Match the end of the string
+// $ = Match the end of the string.
 // \s* = Match any number of whitespace between value fields (allowing for possible (and unnecessary) spaces in between).
 // ; = Match the literal comma that separates the fields.
 
@@ -69,6 +69,7 @@ bool LogTable::Load(const std::string& filePath, LogTable& result)
         return false;
     }
 
+    int highestID = std::numeric_limits<int>().min();
     std::string line;
     while(std::getline(stream, line))
     {
@@ -85,6 +86,10 @@ bool LogTable::Load(const std::string& filePath, LogTable& result)
         }
 
         result.Add(entry);
+        if(entry.GetID() > highestID)
+        {
+            highestID = entry.GetID();
+        }
     }
 
     if(stream.bad())
@@ -94,6 +99,7 @@ bool LogTable::Load(const std::string& filePath, LogTable& result)
     }
 
     stream.close();
+    LogEntry::s_NextID = highestID + 1;
     return true;
 }
 

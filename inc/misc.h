@@ -6,15 +6,16 @@
 #include <string>
 #include "credentials.h"
 #include "database.h"
+#include "logger.h"
 
 /*
     AuthStatus: An enum for representing login status
 */
 enum AuthStatus
 {
-    AS_FAILURE = 0,     // 00000000
-    AS_SUCCESS = 1,     // 00000001
-    AS_EMERGENCY = 2    // 00000010
+    Fail = 0,       // 00000000
+    Success = 1,    // 00000001
+    Emergency = 2   // 00000010
     // Possibly more enum constants here must have the value of double the last one, because they're bitflags
 };
 
@@ -24,22 +25,23 @@ enum AuthStatus
 */
 enum MenuOption
 {
-    MO_EXIT = 'q',
-    MO_LOGOUT = 'x',
-    MO_SETALARM = 'a',
-    MO_CHANGEPASSWORD = 'c'
+    None = 0,
+    Exit = 'q',
+    Logout = 'x',
+    SetAlarm = 'a',
+    ChangePassword = 'c'
 };
 
 int checkPassword(const std::string& providedPIN, const std::string& storedPIN);
-int userLogin(const Credentials& providedCredentials, Database& database, Credentials*& result);
+int userLogin(const std::string& providedPassword, Database& database, Credentials*& result);
 
 void emergencyResponse(void);
 
-void inputCredentials(Credentials& credentials);
+void inputPassword(std::string& password);
 bool changePassword(std::string& pin);
 
-bool configMenu(Credentials* const credentials, bool& isAlarmed);
-void userSession(Credentials* credentials, bool& isAlarmed);
+MenuOption configMenu(void);
+void userSession(Credentials* credentials, bool& isAlarmed, Logger& logger);
 
 std::string statusString(bool isOn);
 

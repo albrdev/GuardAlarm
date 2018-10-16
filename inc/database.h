@@ -21,6 +21,8 @@ public:
     Credentials* FindByID(const int id);
     bool FindByUsername(const std::string& username, Credentials& result);
     Credentials* FindByUsername(const std::string& username);
+    Credentials* FindByPassword(const std::string& password);
+    Credentials* FindBySecondaryPassword(const std::string& password);
 
     static bool Load(const std::string& filePath, Database& result);
 

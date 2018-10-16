@@ -1,40 +1,22 @@
 #include "misc.h"
 
 /*
-    checkPassword: Checks if the provided password matches the one stored in the database
-              Returns status bits of the authentication
-                AS_SUCCESS: The passwords matched successfully
-                AS_EMERGENCY: The password matched with its emergency version, an attack might be possible
-                AS_FAILURE: The passwords did not match
-
-                AuthStatus is a bitflag enum, we can set different bits with OR and have multiple statuses set in one integer
-*/
-int checkPassword(const std::string& providedPassword, const std::string& storedPassword)
-{
-    if(providedPassword != storedPassword)
-    {
-        std::string temp = storedPassword;
-        size_t lastIndex = temp.length() - 1;
-        temp[lastIndex] = (temp[lastIndex] == '9' ? '0' : (char)(temp[lastIndex] + 1)); // Had to cast to char again
-
-        if(providedPassword == temp)
-        {
-            return AS_SUCCESS | AS_EMERGENCY; // Return both these bits to indicate that it's not just a successfull login, it's also an emergency
-        }
-
-        return AS_FAILURE; // Zero is failure
-    }
-
-    return AS_SUCCESS; // Returns success bit only, no emergency
-}
-
-/*
     userLogin: Finds user in database and checks if password is correct
                Uses a reference to a pointer because I think return value should be the status of the login attempt
 */
-int userLogin(const Credentials& providedCredentials, Database& database, Credentials*& result)
+int userLogin(const std::string& providedPassword, Database& database, Credentials*& result)
 {
-    return (result = database.FindByUsername(providedCredentials.GetUsername())) != NULL ? checkPassword(providedCredentials.GetPassword(), result->GetPassword()) : AS_FAILURE;
+    // Check emergency password first, if by some reason, someone else has someones emergency password as a regular password, we avoid possible security bug by always prioritize emergency password
+    if((result = database.FindBySecondaryPassword(providedPassword)) != NULL)
+    {
+        return AuthStatus::Success | AuthStatus::Emergency;
+    }
+    else if((result = database.FindByPassword(providedPassword)) != NULL) // Now we'll check regular password, when we know nobody had this password as an emergency
+    {
+        return AuthStatus::Success;
+    }
+
+    return AuthStatus::Fail;
 }
 
 /*
@@ -42,14 +24,13 @@ int userLogin(const Credentials& providedCredentials, Database& database, Creden
 */
 void emergencyResponse(void)
 {
-    printf("[%s] *** Emergency code detected: Notifying the authorities!\n", timetostr("%H:%M:%S").c_str());
-    printf("Loading police, please wait.....\n");
+    printf("*** Emergency code entered: Notifying the authorities!\n");
 }
 
 /*
     inputCredentials: Login input dialog, asks for username and password and stores them in a Credentials object passed as a referece to this function
 */
-void inputCredentials(Credentials& credentials)
+void inputPassword(std::string& password)
 {
     bool validationSuccessful = false;
     while(!validationSuccessful)
@@ -58,27 +39,18 @@ void inputCredentials(Credentials& credentials)
         // do { ... } while(false); will loop only once, but we will have the ability to break out of it anytime we want (and try all the input phases again), which will save us from nestling if, else if, else
         do
         {
-            std::string username, password;
-
-            printf("Username: ");
-            readString(username);
-            validationSuccessful = Credentials::ValidateUsername(username);
-            if(!validationSuccessful)
-            {
-                fprintf(stderr, "*** Error: Invalid username input\n");
-                break;
-            }
+            std::string input;
 
             printf("Input password: ");
-            readString(password);
-            validationSuccessful = Credentials::ValidatePassword(password);
+            readString(input);
+            validationSuccessful = Credentials::ValidatePassword(input);
             if(!validationSuccessful)
             {
-                fprintf(stderr, "*** Error: Invalid password input\n");
+                fprintf(stderr, "*** Error: Malformatted password input\n");
                 break;
             }
 
-            credentials = Credentials(-1, username, password);
+            password = input;
         } while(false);
     }
 }
@@ -118,57 +90,72 @@ bool changePassword(std::string& password)
                 Parameter 'credentials' for changing password code (needed a pointer to update the database entry directly)
                 Parameter 'isAlarmed' is an out parameter to set the variable in the calling function
 */
-bool configMenu(Credentials* const credentials, bool& isAlarmed)
+MenuOption configMenu(void)
 {
     char choice;
-    bool validChoice = false;
 
-    while(!validChoice)
+    printf("%c) Toggle alarm\n", SetAlarm);
+    printf("%c) Change password\n", ChangePassword);
+    printf("%c) Log out\n", Logout);
+    printf("%c) Exit\n", Exit);
+
+    do
     {
-        printf("%c) Turn alarm %s\n", MO_SETALARM, statusString(!isAlarmed).c_str());
-        printf("%c) Change password\n", MO_CHANGEPASSWORD);
-        printf("%c) Log out\n", MO_LOGOUT);
-        printf("%c) Exit\n", MO_EXIT);
+        printf("> ");
+    } while(!readChar(choice));
 
-        do
-        {
-            printf("> ");
-        } while(!readChar(choice));
+    return (MenuOption)choice;
+}
 
-        switch(choice)
+/*
+    userSession: Includes 'configMenu' and the login/logout printing, this function is called in multiple places and needed refactoring
+*/
+void userSession(Credentials* credentials, bool& isAlarmed, Logger& logger)
+{
+    printf("Alarm is %s!\n", statusString(isAlarmed).c_str());
+    logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "User logged in"));
+    printf("User logged in\n\n");
+
+    MenuOption option = MenuOption::None;
+    while(option != MenuOption::Logout)
+    {
+        switch((option = configMenu()))
         {
-            case MO_SETALARM:
+            case MenuOption::SetAlarm:
             {
                 isAlarmed = !isAlarmed; // Set to its opposite / toggle alarm ON/OFF
+                logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "Alarm set to " + statusString(isAlarmed)));
                 printf("*** Alarm set to %s\n", statusString(isAlarmed).c_str());
 
-                validChoice = true;
                 break;
             }
 
             // Because of a temporary variable inside a case, I had to encapsule the following to avoid compilation error (I might as well wrap all case labels in {} blocks).
             // Variable 'temp' exists otherwise in all the case labels below it.
-            case MO_CHANGEPASSWORD:
+            case MenuOption::ChangePassword:
             {
                 std::string temp;
                 if(changePassword(temp))
                 {
                     // If new password is acceptable, do the change in the database (With a pointer you don't need to find the entry again)
                     credentials->SetPassword(temp);
+                    logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "Password changed"));
                     printf("*** Password changed\n");
                 }
 
-                validChoice = true;
                 break;
             }
 
-            case MO_LOGOUT:
+            case MenuOption::Logout:
             {
-                return false; // Return 'false' to indicate that we don't want to loop the menu (i.e. log out)
+                logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "User logged out"));
+                printf("User logged out\n");
+                break;
             }
 
-            case MO_EXIT:
+            case MenuOption::Exit:
             {
+                logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "Application exit"));
                 exit(EXIT_SUCCESS); // Exits program, returns 0
                 break;
             }
@@ -176,29 +163,13 @@ bool configMenu(Credentials* const credentials, bool& isAlarmed)
             default:
             {
                 fprintf(stderr, "*** Invalid input\n");
+                option = MenuOption::None;
                 break; // Not actually needed in 'default', but to be consistent
             }
         }
-    }
 
-    return true;
-}
-
-/*
-    userSession: Includes 'configMenu' and the login/logout printing, this function is called in multiple places and needed refactoring
-*/
-void userSession(Credentials* credentials, bool& isAlarmed)
-{
-    printf("Alarm is %s!\n", statusString(isAlarmed).c_str());
-    printf("[%s] User \'%s\' logged in\n", timetostr("%H:%M:%S").c_str(), credentials->GetUsername().c_str());
-
-    do
-    {
         printf("\n");
-        statusString(isAlarmed);
-    } while(configMenu(credentials, isAlarmed));
-
-    printf("[%s] User \'%s\' logged out\n\n", timetostr("%H:%M:%S").c_str(), credentials->GetUsername().c_str());
+    }
 }
 
 /*

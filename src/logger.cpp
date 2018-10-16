@@ -25,7 +25,7 @@ void Logger::Close(void)
 
 bool Logger::WriteCSV(const LogEntry &value)
 {
-    m_FileStream << value.ToCSVString();
+    m_FileStream << value.ToCSVString() << std::endl;
     return !m_FileStream.fail();
 }
 
