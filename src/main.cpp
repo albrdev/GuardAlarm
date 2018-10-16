@@ -13,7 +13,7 @@
     I be consistent I would have changed the input too to some C function, like scanf, but I didn't have time, so I keep std::cin
 */
 
-template<typename T> void print(const Table<T>& table)
+template<typename T> void printTable(const Table<T>& table)
 {
     for(std::size_t i = 0; i < table.Count(); i++)
     {
