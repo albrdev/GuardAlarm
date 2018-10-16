@@ -55,7 +55,7 @@ int main(void)
     }
 
     printf("Database successfully loaded %llu entries\n", database.Count());
-    //print(database);
+    //printTable(database);
 
     if(!LogTable::Load(logFilePath, logs))
     {
@@ -64,7 +64,7 @@ int main(void)
     }
 
     printf("Logs successfully loaded %llu entries\n", logs.Count());
-    //print(logs);
+    //printTable(logs);
 
     if(!SensorTable::Load(sensorsFilePath, sensors))
     {
@@ -73,7 +73,7 @@ int main(void)
     }
 
     printf("Sensors successfully loaded %llu entries\n", sensors.Count());
-    //print(sensors);
+    printTable(sensors);
 
     int attemptedLogins = 0;
     while(true)
