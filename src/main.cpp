@@ -22,7 +22,7 @@ template<typename T> void printTable(const Table<T>& table)
     std::cout << std::endl;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
     const int LOGINATTEMPTS_MAX = 3;
     const std::string databaseFilePath = "users.dat";
@@ -32,7 +32,7 @@ int main(void)
     Database database;
     LogTable logs;
     SensorTable sensors;
-    Logger logger(logFilePath);
+    Logger logger;
     bool isAlarmed = true;
 
     // Remove buffered output for 'stderr'
@@ -42,11 +42,20 @@ int main(void)
         return 1;
     }
 
-    if(!logger.IsOpen())
+    if(!logger.Open(logFilePath))
     {
         fprintf(stderr, "*** Error opening logfile: %s\n", logger.GetFilePath().c_str());
         return 2;
     }
+
+    if(!SensorTable::Load(sensorsFilePath, sensors))
+    {
+        fprintf(stderr, "*** Error reading sensors: %s:%llu\n", sensorsFilePath.c_str(), sensors.Count() + 1);
+        return 5;
+    }
+
+    printf("Sensors successfully loaded %llu entries\n", sensors.Count());
+    printTable(sensors);
 
     if(!Database::Load(databaseFilePath, database))
     {
@@ -65,15 +74,6 @@ int main(void)
 
     printf("Logs successfully loaded %llu entries\n", logs.Count());
     //printTable(logs);
-
-    if(!SensorTable::Load(sensorsFilePath, sensors))
-    {
-        fprintf(stderr, "*** Error reading sensors: %s:%llu\n", sensorsFilePath.c_str(), sensors.Count() + 1);
-        return 5;
-    }
-
-    printf("Sensors successfully loaded %llu entries\n", sensors.Count());
-    printTable(sensors);
 
     int attemptedLogins = 0;
     while(true)
