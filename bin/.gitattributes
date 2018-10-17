@@ -1,5 +1,4 @@
+* binary
+
 .gitignore text eol=lf
 .gitattributes text eol=lf
-
-* binary
-.gitignore text eol=lf
