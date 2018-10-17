@@ -4,8 +4,8 @@
 #include <cstdio>
 #include <ctime>
 #include <string>
-#include "credentials.h"
-#include "database.h"
+#include "userentry.h"
+#include "usertable.h"
 #include "logger.h"
 
 /*
@@ -33,7 +33,7 @@ enum MenuOption
 };
 
 int checkPassword(const std::string& providedPIN, const std::string& storedPIN);
-int userLogin(const std::string& providedPassword, Database& database, Credentials*& result);
+int userLogin(const std::string& providedPassword, UserTable& usertable, UserEntry*& result);
 
 void emergencyResponse(void);
 
@@ -41,7 +41,7 @@ void inputPassword(std::string& password);
 bool changePassword(std::string& pin);
 
 MenuOption configMenu(void);
-void userSession(Credentials* credentials, bool& isAlarmed, Logger& logger);
+void userSession(UserEntry* userentry, bool& isAlarmed, Logger& logger);
 
 std::string statusString(bool isOn);
 

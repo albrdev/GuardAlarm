@@ -14,7 +14,7 @@ CMD_RM    = rm -f
 CMD_LN    = ln -sf
 CMD_PRINT = @printf
 
-OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/regexassembly.o $(DIR_OBJ)/entry.o $(DIR_OBJ)/credentials.o $(DIR_OBJ)/logentry.o $(DIR_OBJ)/sensorentry.o $(DIR_OBJ)/table.o $(DIR_OBJ)/database.o $(DIR_OBJ)/logtable.o $(DIR_OBJ)/sensortable.o $(DIR_OBJ)/logger.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
+OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/regexassembly.o $(DIR_OBJ)/entry.o $(DIR_OBJ)/userentry.o $(DIR_OBJ)/logentry.o $(DIR_OBJ)/sensorentry.o $(DIR_OBJ)/table.o $(DIR_OBJ)/usertable.o $(DIR_OBJ)/logtable.o $(DIR_OBJ)/sensortable.o $(DIR_OBJ)/logger.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
 
 .PHONY: all
 all: $(DIR_BIN)/$(BIN)
@@ -44,7 +44,7 @@ $(DIR_OBJ)/sensortable.o: $(DIR_SRC)/sensortable.cpp $(DIR_INC)/sensortable.h
 $(DIR_OBJ)/logtable.o: $(DIR_SRC)/logtable.cpp $(DIR_INC)/logtable.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
   
-$(DIR_OBJ)/database.o: $(DIR_SRC)/database.cpp $(DIR_INC)/database.h
+$(DIR_OBJ)/usertable.o: $(DIR_SRC)/usertable.cpp $(DIR_INC)/usertable.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
 $(DIR_OBJ)/table.o: $(DIR_SRC)/table.cpp $(DIR_INC)/table.h
@@ -56,7 +56,7 @@ $(DIR_OBJ)/sensorentry.o: $(DIR_SRC)/sensorentry.cpp $(DIR_INC)/sensorentry.h
 $(DIR_OBJ)/logentry.o: $(DIR_SRC)/logentry.cpp $(DIR_INC)/logentry.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/credentials.o: $(DIR_SRC)/credentials.cpp $(DIR_INC)/credentials.h
+$(DIR_OBJ)/userentry.o: $(DIR_SRC)/userentry.cpp $(DIR_INC)/userentry.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
 $(DIR_OBJ)/entry.o: $(DIR_SRC)/entry.cpp $(DIR_INC)/entry.h

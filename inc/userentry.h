@@ -1,12 +1,12 @@
-#ifndef _CREDENTIALS_H_
-#define _CREDENTIALS_H_
+#ifndef _USERENTRY_H_
+#define _USERENTRY_H_
 
 #include <string>
 #include <sstream>
 #include "entry.h"
 #include "regexassembly.h"
 
-class Database;
+class UserTable;
 
 enum UserStatus
 {
@@ -15,12 +15,12 @@ enum UserStatus
     Blocked = 3
 };
 
-class Credentials : public Entry
+class UserEntry : public Entry
 {
-    friend class Database;
+    friend class UserTable;
 
 private:
-    friend std::ostream& operator <<(std::ostream& stream, const Credentials& object);
+    friend std::ostream& operator <<(std::ostream& stream, const UserEntry& object);
 
     static int s_NextID;
 
@@ -63,11 +63,11 @@ public:
     virtual std::string ToString(void) const override;
 
     // Constructors
-    Credentials(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status = UserStatus::Active); // Variable 'active' har a defualt value of 'true', if not specified explicitly
-    Credentials(const int id, const std::string& password, const std::string& username, UserStatus status = UserStatus::Active);
-    Credentials(const std::string& password, const std::string& username, const int tagID, UserStatus status);
-    Credentials(const std::string& password, const std::string& username, UserStatus status);
-    Credentials(void);
+    UserEntry(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status = UserStatus::Active); // Variable 'active' har a defualt value of 'true', if not specified explicitly
+    UserEntry(const int id, const std::string& password, const std::string& username, UserStatus status = UserStatus::Active);
+    UserEntry(const std::string& password, const std::string& username, const int tagID, UserStatus status);
+    UserEntry(const std::string& password, const std::string& username, UserStatus status);
+    UserEntry(void);
 };
 
-#endif // _CREDENTIALS_H_
+#endif // _USERENTRY_H_

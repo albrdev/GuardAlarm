@@ -1,17 +1,17 @@
 #include "misc.h"
 
 /*
-    userLogin: Finds user in database and checks if password is correct
+    userLogin: Finds user in the table and checks if password is correct
                Uses a reference to a pointer because I think return value should be the status of the login attempt
 */
-int userLogin(const std::string& providedPassword, Database& database, Credentials*& result)
+int userLogin(const std::string& providedPassword, UserTable& usertable, UserEntry*& result)
 {
     // Check emergency password first, if by some reason, someone else has someones emergency password as a regular password, we avoid possible security bug by always prioritize emergency password
-    if((result = database.FindBySecondaryPassword(providedPassword)) != NULL)
+    if((result = usertable.FindBySecondaryPassword(providedPassword)) != NULL)
     {
         return AuthStatus::Success | AuthStatus::Emergency;
     }
-    else if((result = database.FindByPassword(providedPassword)) != NULL) // Now we'll check regular password, when we know nobody had this password as an emergency
+    else if((result = usertable.FindByPassword(providedPassword)) != NULL) // Now we'll check regular password, when we know nobody had this password as an emergency
     {
         return AuthStatus::Success;
     }
@@ -28,7 +28,7 @@ void emergencyResponse(void)
 }
 
 /*
-    inputCredentials: Login input dialog, asks for username and password and stores them in a Credentials object passed as a referece to this function
+    inputPassword: Login input dialog, asks for password and stores it in the string referece parameter
 */
 void inputPassword(std::string& password)
 {
@@ -43,7 +43,7 @@ void inputPassword(std::string& password)
 
             printf("Input password: ");
             readString(input);
-            validationSuccessful = Credentials::ValidatePassword(input);
+            validationSuccessful = UserEntry::ValidatePassword(input);
             if(!validationSuccessful)
             {
                 fprintf(stderr, "*** Error: Malformatted password input\n");
@@ -66,7 +66,7 @@ bool changePassword(std::string& password)
 
     printf("Type new password: ");
     readString(temp1);
-    if(!Credentials::ValidatePassword(temp1))
+    if(!UserEntry::ValidatePassword(temp1))
     {
         fprintf(stderr, "*** Error: Invalid password format\n");
         return false;
@@ -86,9 +86,7 @@ bool changePassword(std::string& password)
 
 /*
     configMenu: This is the menu available when logged in. I want to alter variables from the calling function (main) inside this and therefore i used references, which here is kind of ugly, out a simple solution
-                Returns 'true' if the menu should continue to ask for options and 'false' if the user wants to log out
-                Parameter 'credentials' for changing password code (needed a pointer to update the database entry directly)
-                Parameter 'isAlarmed' is an out parameter to set the variable in the calling function
+                Returns the option enum chosen
 */
 MenuOption configMenu(void)
 {
@@ -110,10 +108,10 @@ MenuOption configMenu(void)
 /*
     userSession: Includes 'configMenu' and the login/logout printing, this function is called in multiple places and needed refactoring
 */
-void userSession(Credentials* credentials, bool& isAlarmed, Logger& logger)
+void userSession(UserEntry* userentry, bool& isAlarmed, Logger& logger)
 {
     printf("Alarm is %s!\n", statusString(isAlarmed).c_str());
-    logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "User logged in"));
+    logger.WriteCSV(LogEntry(time(NULL), userentry->GetID(), "User logged in"));
     printf("User logged in\n\n");
 
     MenuOption option = MenuOption::None;
@@ -124,7 +122,7 @@ void userSession(Credentials* credentials, bool& isAlarmed, Logger& logger)
             case MenuOption::SetAlarm:
             {
                 isAlarmed = !isAlarmed; // Set to its opposite / toggle alarm ON/OFF
-                logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "Alarm set to " + statusString(isAlarmed)));
+                logger.WriteCSV(LogEntry(time(NULL), userentry->GetID(), "Alarm set to " + statusString(isAlarmed)));
                 printf("*** Alarm set to %s\n", statusString(isAlarmed).c_str());
 
                 break;
@@ -137,9 +135,9 @@ void userSession(Credentials* credentials, bool& isAlarmed, Logger& logger)
                 std::string temp;
                 if(changePassword(temp))
                 {
-                    // If new password is acceptable, do the change in the database (With a pointer you don't need to find the entry again)
-                    credentials->SetPassword(temp);
-                    logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "Password changed"));
+                    // If new password is acceptable, do the change in the table (With a pointer you don't need to find the entry again)
+                    userentry->SetPassword(temp);
+                    logger.WriteCSV(LogEntry(time(NULL), userentry->GetID(), "Password changed"));
                     printf("*** Password changed\n");
                 }
 
@@ -148,14 +146,14 @@ void userSession(Credentials* credentials, bool& isAlarmed, Logger& logger)
 
             case MenuOption::Logout:
             {
-                logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "User logged out"));
+                logger.WriteCSV(LogEntry(time(NULL), userentry->GetID(), "User logged out"));
                 printf("User logged out\n");
                 break;
             }
 
             case MenuOption::Exit:
             {
-                logger.WriteCSV(LogEntry(time(NULL), credentials->GetID(), "Application exit"));
+                logger.WriteCSV(LogEntry(time(NULL), userentry->GetID(), "Application exit"));
                 exit(EXIT_SUCCESS); // Exits program, returns 0
                 break;
             }
