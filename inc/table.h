@@ -23,7 +23,7 @@ public:
 
     bool Remove(const T& item)
     {
-        for(size_t i = 0; i < m_Content.size(); i++)
+        for(std::size_t i = 0U; i < m_Content.size(); i++)
         {
             if(m_Content[i] == item)
             {
