@@ -14,7 +14,7 @@ CMD_RM    = rm -f
 CMD_LN    = ln -sf
 CMD_PRINT = @printf
 
-OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/regexassembly.o $(DIR_OBJ)/entry.o $(DIR_OBJ)/userentry.o $(DIR_OBJ)/logentry.o $(DIR_OBJ)/sensorentry.o $(DIR_OBJ)/table.o $(DIR_OBJ)/usertable.o $(DIR_OBJ)/logtable.o $(DIR_OBJ)/sensortable.o $(DIR_OBJ)/logger.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
+OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/RegexAssembly.o $(DIR_OBJ)/Entry.o $(DIR_OBJ)/UserEntry.o $(DIR_OBJ)/LogEntry.o $(DIR_OBJ)/SensorEntry.o $(DIR_OBJ)/Table.o $(DIR_OBJ)/UserTable.o $(DIR_OBJ)/LogTable.o $(DIR_OBJ)/SensorTable.o $(DIR_OBJ)/logger.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
 
 .PHONY: all
 all: $(DIR_BIN)/$(BIN)
@@ -38,31 +38,31 @@ $(DIR_OBJ)/misc.o: $(DIR_SRC)/misc.cpp $(DIR_INC)/misc.h
   $(DIR_OBJ)/logger.o: $(DIR_SRC)/logger.cpp $(DIR_INC)/logger.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/sensortable.o: $(DIR_SRC)/sensortable.cpp $(DIR_INC)/sensortable.h
+$(DIR_OBJ)/SensorTable.o: $(DIR_SRC)/SensorTable.cpp $(DIR_INC)/SensorTable.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/logtable.o: $(DIR_SRC)/logtable.cpp $(DIR_INC)/logtable.h
+$(DIR_OBJ)/LogTable.o: $(DIR_SRC)/LogTable.cpp $(DIR_INC)/LogTable.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
   
-$(DIR_OBJ)/usertable.o: $(DIR_SRC)/usertable.cpp $(DIR_INC)/usertable.h
+$(DIR_OBJ)/UserTable.o: $(DIR_SRC)/UserTable.cpp $(DIR_INC)/UserTable.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/table.o: $(DIR_SRC)/table.cpp $(DIR_INC)/table.h
+$(DIR_OBJ)/Table.o: $(DIR_SRC)/Table.cpp $(DIR_INC)/Table.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/sensorentry.o: $(DIR_SRC)/sensorentry.cpp $(DIR_INC)/sensorentry.h
+$(DIR_OBJ)/SensorEntry.o: $(DIR_SRC)/SensorEntry.cpp $(DIR_INC)/SensorEntry.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/logentry.o: $(DIR_SRC)/logentry.cpp $(DIR_INC)/logentry.h
+$(DIR_OBJ)/LogEntry.o: $(DIR_SRC)/LogEntry.cpp $(DIR_INC)/LogEntry.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/userentry.o: $(DIR_SRC)/userentry.cpp $(DIR_INC)/userentry.h
+$(DIR_OBJ)/UserEntry.o: $(DIR_SRC)/UserEntry.cpp $(DIR_INC)/UserEntry.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/entry.o: $(DIR_SRC)/entry.cpp $(DIR_INC)/entry.h
+$(DIR_OBJ)/Entry.o: $(DIR_SRC)/Entry.cpp $(DIR_INC)/Entry.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/regexassembly.o: $(DIR_SRC)/regexassembly.cpp $(DIR_INC)/regexassembly.h
+$(DIR_OBJ)/RegexAssembly.o: $(DIR_SRC)/RegexAssembly.cpp $(DIR_INC)/RegexAssembly.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
   
 $(DIR_OBJ)/generic.o: $(DIR_SRC)/generic.cpp $(DIR_INC)/generic.h
