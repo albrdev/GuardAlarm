@@ -14,7 +14,7 @@ CMD_RM    = rm -f
 CMD_LN    = ln -sf
 CMD_PRINT = @printf
 
-OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/RegexAssembly.o $(DIR_OBJ)/Entry.o $(DIR_OBJ)/UserEntry.o $(DIR_OBJ)/LogEntry.o $(DIR_OBJ)/SensorEntry.o $(DIR_OBJ)/Table.o $(DIR_OBJ)/UserTable.o $(DIR_OBJ)/LogTable.o $(DIR_OBJ)/SensorTable.o $(DIR_OBJ)/logger.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
+OBJS      = $(DIR_OBJ)/generic.o $(DIR_OBJ)/RegexAssembly.o $(DIR_OBJ)/Entry.o $(DIR_OBJ)/UserEntry.o $(DIR_OBJ)/LogEntry.o $(DIR_OBJ)/SensorEntry.o $(DIR_OBJ)/Table.o $(DIR_OBJ)/UserTable.o $(DIR_OBJ)/LogTable.o $(DIR_OBJ)/SensorTable.o $(DIR_OBJ)/Logger.o $(DIR_OBJ)/misc.o $(DIR_OBJ)/main.o
 
 .PHONY: all
 all: $(DIR_BIN)/$(BIN)
@@ -35,7 +35,7 @@ $(DIR_OBJ)/main.o: $(DIR_SRC)/main.cpp
 $(DIR_OBJ)/misc.o: $(DIR_SRC)/misc.cpp $(DIR_INC)/misc.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-  $(DIR_OBJ)/logger.o: $(DIR_SRC)/logger.cpp $(DIR_INC)/logger.h
+  $(DIR_OBJ)/Logger.o: $(DIR_SRC)/Logger.cpp $(DIR_INC)/Logger.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
 $(DIR_OBJ)/SensorTable.o: $(DIR_SRC)/SensorTable.cpp $(DIR_INC)/SensorTable.h
