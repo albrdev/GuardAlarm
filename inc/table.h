@@ -5,8 +5,8 @@
 #include <fstream>
 #include <vector>
 #include "generic.h"
-#include "regexassembly.h"
-#include "entry.h"
+#include "RegexAssembly.h"
+#include "Entry.h"
 
 template <typename T>
 class Table

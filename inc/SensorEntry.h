@@ -5,8 +5,8 @@
 #include <string>
 #include <sstream>
 #include "generic.h"
-#include "entry.h"
-#include "regexassembly.h"
+#include "Entry.h"
+#include "RegexAssembly.h"
 
 enum SensorStatus
 {

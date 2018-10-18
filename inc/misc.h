@@ -4,9 +4,9 @@
 #include <cstdio>
 #include <ctime>
 #include <string>
-#include "userentry.h"
-#include "usertable.h"
-#include "logger.h"
+#include "UserEntry.h"
+#include "UserTable.h"
+#include "Logger.h"
 
 /*
     AuthStatus: An enum for representing login status

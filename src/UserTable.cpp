@@ -1,4 +1,4 @@
-#include "usertable.h"
+#include "UserTable.h"
 
 // Regex explanation:
 // ^\s*([0-9]+)\s*;\s*([0-9]{4,6})\s*;\s*([a-zA-Z]+)\s*;\s*([0-9]*)\s*;\s*([1-3])\s*;\s*(\S*)\s*$

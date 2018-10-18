@@ -3,7 +3,7 @@
 
 #include <string>
 #include <fstream>
-#include "logentry.h"
+#include "LogEntry.h"
 
 /*
     Class used for writing logs and automatically closes the file

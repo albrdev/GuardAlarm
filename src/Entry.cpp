@@ -1,4 +1,4 @@
-#include "entry.h"
+#include "Entry.h"
 
 const RegexAssembly Entry::c_IDRegex("[0-9]+");
 

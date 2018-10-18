@@ -3,8 +3,8 @@
 
 #include <string>
 #include <sstream>
-#include "entry.h"
-#include "regexassembly.h"
+#include "Entry.h"
+#include "RegexAssembly.h"
 
 class UserTable;
 

@@ -5,9 +5,9 @@
 #include <fstream>
 #include <vector>
 #include "generic.h"
-#include "table.h"
-#include "sensorentry.h"
-#include "regexassembly.h"
+#include "Table.h"
+#include "SensorEntry.h"
+#include "RegexAssembly.h"
 
 class SensorTable : public Table<SensorEntry>
 {

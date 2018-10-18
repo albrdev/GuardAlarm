@@ -1,4 +1,4 @@
-#include "sensortable.h"
+#include "SensorTable.h"
 
 // Regex explanation:
 // ^\s*([0-9]+)\s*;\s*(-1|[0-1])\s*$

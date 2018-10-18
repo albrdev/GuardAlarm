@@ -1,4 +1,4 @@
-#include "sensorentry.h"
+#include "SensorEntry.h"
 
 int SensorEntry::s_NextID = 0;
 

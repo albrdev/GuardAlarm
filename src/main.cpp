@@ -1,12 +1,12 @@
 #include <cstdio>
-#include "userentry.h"
-#include "usertable.h"
-#include "logentry.h"
-#include "logtable.h"
-#include "sensorentry.h"
-#include "sensortable.h"
+#include "UserEntry.h"
+#include "UserTable.h"
+#include "LogEntry.h"
+#include "LogTable.h"
+#include "SensorEntry.h"
+#include "SensorTable.h"
+#include "Logger.h"
 #include "misc.h"
-#include "logger.h"
 
 /*
     I'd prefer printf over std::cout mostly because it's much more readable, especially mixed with variables and not just constant strings

@@ -1,4 +1,4 @@
-#include "userentry.h"
+#include "UserEntry.h"
 
 int UserEntry::s_NextID = 0;
 

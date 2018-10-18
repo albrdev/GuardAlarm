@@ -3,7 +3,7 @@
 
 #include <string>
 #include <sstream>
-#include "regexassembly.h"
+#include "RegexAssembly.h"
 
 class Entry
 {
