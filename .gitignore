@@ -1,8 +1,8 @@
 *
-!src/
-!src/*
 !inc/
 !inc/*
+!src/
+!src/*
 !obj/
 !obj/*
 !bin/

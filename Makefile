@@ -2,8 +2,8 @@ CC				= g++
 CC_FLAGS	= -pedantic -Wall -Wextra -Wconversion
 CC_LIBS		= 
 
-DIR_SRC		= src
 DIR_INC		= inc
+DIR_SRC		= src
 DIR_OBJ		= obj
 DIR_BIN		= bin
 
