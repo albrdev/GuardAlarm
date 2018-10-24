@@ -26,6 +26,10 @@ clean:
 	$(CMD_RM) $(DIR_BIN)/$(BIN)
 	$(CMD_RM) $(DIR_OBJ)/*.o
 
+.PHONY: run
+run: $(DIR_BIN)/$(BIN)
+	./$<
+
 $(DIR_BIN)/$(BIN): $(OBJS)
 	$(CC) $(DIR_OBJ)/*.o $(CC_LIBS) -o $(DIR_BIN)/$(BIN)
 
