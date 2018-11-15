@@ -77,7 +77,7 @@ std::string timetostr(const std::string& format)
 
 std::time_t strtotime(const char *const str)
 {
-    struct tm ts = { 0, 0, 0, 0, 0, 0, 0, 0, -1 };
+    struct tm ts;
     memset(&ts, 0, sizeof(ts));
     ts.tm_isdst = -1;
 
