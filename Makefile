@@ -2,6 +2,9 @@ CC				:= g++
 CC_FLAGS	:= -pedantic -Wall -Wextra -Wconversion
 CC_LIBS		:= 
 
+FLAGS_DBG := -g
+FLAGS_RLS := -DNDEBUG
+
 DIR_INC		:= inc
 DIR_SRC		:= src
 DIR_OBJ		:= obj
@@ -14,16 +17,24 @@ CMD_RM    := rm -f
 CMD_LN    := ln -sf
 CMD_PRINT := @printf
 
-INCS	:= $(wildcard $(DIR_INC)/*.h)
 SRCS	:= $(wildcard $(DIR_SRC)/*.cpp)
 OBJS	:= $(patsubst $(DIR_SRC)/%.cpp,$(DIR_OBJ)/%.o,$(SRCS))
 
 .PHONY: all
-all: $(DIR_BIN)/$(BIN)
+all: debug
+
+.PHONY: release
+release: CC_FLAGS += $(FLAGS_RLS)
+release: $(DIR_BIN)/$(BIN)
+
+.PHONY: debug
+debug: CC_FLAGS += $(FLAGS_DBG)
+debug: $(DIR_BIN)/$(BIN)
+
 
 .PHONY: clean
 clean:
-	$(CMD_RM) $(DIR_OBJ)/*.o
+	$(CMD_RM) $(OBJS)
 
 .PHONY: distclean
 distclean: clean
@@ -31,7 +42,7 @@ distclean: clean
 
 .PHONY: run
 run: $(DIR_BIN)/$(BIN)
-	./$<
+	./$+
 
 $(DIR_BIN)/$(BIN): $(OBJS)
 	$(CC) $(OBJS) $(CC_LIBS) -o $(DIR_BIN)/$(BIN)
