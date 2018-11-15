@@ -4,7 +4,7 @@
 #include <ctime>
 #include <string>
 #include <sstream>
-#include "generic.h"
+#include "Generic.h"
 #include "Entry.h"
 #include "RegexAssembly.h"
 

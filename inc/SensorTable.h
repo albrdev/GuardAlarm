@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <vector>
-#include "generic.h"
+#include "Generic.h"
 #include "Table.h"
 #include "SensorEntry.h"
 #include "RegexAssembly.h"

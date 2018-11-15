@@ -6,7 +6,7 @@
 #include "SensorEntry.h"
 #include "SensorTable.h"
 #include "Logger.h"
-#include "misc.h"
+#include "Misc.h"
 
 /*
     I'd prefer printf over std::cout mostly because it's much more readable, especially mixed with variables and not just constant strings
