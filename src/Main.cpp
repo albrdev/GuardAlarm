@@ -50,25 +50,25 @@ int main(int argc, char *argv[])
 
     if(!SensorTable::Load(sensorsFilePath, sensors))
     {
-        fprintf(stderr, "*** Error reading sensors: %s:%llu\n", sensorsFilePath.c_str(), sensors.Count() + 1);
+        fprintf(stderr, "*** Error reading sensors: %s:%zu\n", sensorsFilePath.c_str(), sensors.Count() + 1);
         return 5;
     }
 
-    printf("Sensors successfully loaded %llu entries\n", sensors.Count());
+    printf("Sensors successfully loaded %zu entries\n", sensors.Count());
     printTable(sensors);
 
     if(!UserTable::Load(usersFilePath, users))
     {
-        fprintf(stderr, "*** Error reading users: %s:%llu\n", usersFilePath.c_str(), users.Count() + 1);
+        fprintf(stderr, "*** Error reading users: %s:%zu\n", usersFilePath.c_str(), users.Count() + 1);
         return 3;
     }
 
-    printf("Users successfully loaded %llu entries\n", users.Count());
+    printf("Users successfully loaded %zu entries\n", users.Count());
     //printTable(users);
 
     if(!LogTable::Load(logFilePath, logs))
     {
-        fprintf(stderr, "*** Error reading logs: %s:%llu\n", logFilePath.c_str(), logs.Count() + 1);
+        fprintf(stderr, "*** Error reading logs: %s:%zu\n", logFilePath.c_str(), logs.Count() + 1);
         return 4;
     }
 
