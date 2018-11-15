@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
         return 4;
     }
 
-    printf("Logs successfully loaded %llu entries\n", logs.Count());
+    printf("Logs successfully loaded %zu entries\n", logs.Count());
     //printTable(logs);
 
     int attemptedLogins = 0;
