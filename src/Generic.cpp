@@ -78,6 +78,9 @@ std::string timetostr(const std::string& format)
 std::time_t strtotime(const char *const str)
 {
     struct tm ts = { 0, 0, 0, 0, 0, 0, 0, 0, -1 };
+    memset(&ts, 0, sizeof(ts));
+    ts.tm_isdst = -1;
+
     if(std::sscanf(str, "%4d.%2d.%2d %2d:%2d:%2d", &ts.tm_year, &ts.tm_mon, &ts.tm_mday, &ts.tm_hour, &ts.tm_min, &ts.tm_sec) != 6)
     {
         return (std::time_t) - 1;

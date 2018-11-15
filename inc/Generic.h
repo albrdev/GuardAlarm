@@ -1,6 +1,7 @@
 #ifndef _GENERIC_H_
 #define _GENERIC_H_
 
+#include <cstring>
 #include <ctime>
 #include <iostream>
 #include <sstream>
