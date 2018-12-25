@@ -1,0 +1,7 @@
+*
+!server/
+!server/*
+!client/
+!client/*
+!.gitignore
+!.gitattributes
