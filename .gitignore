@@ -5,3 +5,4 @@
 !client/*
 !.gitignore
 !.gitattributes
+!log.txt
