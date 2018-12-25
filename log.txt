@@ -1,0 +1,6 @@
+2018-12-23: Setting up and testing piezo speaker and the alarm triggering button, making classes for them both
+2018-12-24: Testing 4x4 keypad, considered aking my own class to handle it, but then i found there already was one
+            Setting up LEDs, testing with 220Ohm resistor at first, making a LED class, works fine.
+            Tried making a Lerp method for the speaker class so I can lerp through 2 different values under a specific time making it sound like a siren, worked well except when value1 > value2, but recognized it to be a unsigned problem, just changed it to signed ints during the calculation then we cast it back to unsigned when done
+2018-12-25: Managing "old" git repo to handle both server(computer/database etc.) and cient(Arduino) side
+            Made a blink method for LED class
