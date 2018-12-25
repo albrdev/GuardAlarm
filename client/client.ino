@@ -54,6 +54,10 @@ void loop()
 {
     button.Poll();
 
+    ledRed.Blink(5, 100);
+    ledYellow.Blink(5, 100);
+    ledGreen.Blink(5, 100);
+
     char key = keypad.getKey();
     if(key != '\0')
     {
