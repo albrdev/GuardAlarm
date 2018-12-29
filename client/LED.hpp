@@ -9,6 +9,9 @@ private:
     uint8_t m_Pin;
     bool m_State;
 
+    bool initialState;
+    unsigned long int nextState = 0UL;
+
 public:
     bool GetState(void) const;
     void SetState(const bool value);
@@ -16,7 +19,9 @@ public:
     void Blink(const int count, const unsigned long int duration);
     void Blink(const int count, const unsigned long int duration1, const unsigned long int duration2);
 
-    LED(uint8_t pin, bool state = false);
+    void Blink(const bool blink, const unsigned long int duration);
+
+    LED(const uint8_t pin, const bool state = false);
 };
 
 #endif // _LED_HPP_

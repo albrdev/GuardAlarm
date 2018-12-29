@@ -32,7 +32,23 @@ void LED::Blink(const int count, const unsigned long int duration1, const unsign
     SetState(initialState);
 }
 
-LED::LED(uint8_t pin, bool state)
+void LED::Blink(const bool blink, const unsigned long int duration)
+{
+    if(!blink)
+    {
+        nextState = 0UL;
+        return;
+    }
+
+    unsigned long int now = millis();
+    if(now >= nextState)
+    {
+        SetState(!m_State);
+        nextState = now + duration;
+    }
+}
+
+LED::LED(const uint8_t pin, const bool state)
 {
     m_Pin = pin;
 
