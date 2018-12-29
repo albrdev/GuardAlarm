@@ -11,7 +11,7 @@
   Made a blink method for LED class
 
 [2018-12-28]
-  Considering and testing out transmission via packets between Arduino and computer. Packets should have a type for the data/action/response and a checksum to verify that the data received is also (most likely) the data sent. We don't want data corruption or sync error to mess with alarm security (maybe this is overkill, but fun nevertheless).
+  Considering and testing out transmission via packets between Arduino and computer. Packets should have a type for the data/action/response and a checksum to verify that the data received is also (most likely) the data sent. We don't want data corruption or sync error to mess with alarm security (maybe this is overkill, but fun nevertheless) (this link addresses some of these problems: https://medium.com/@araffin/simple-and-robust-computer-arduino-serial-communication-f91b95596788).
   Checksums should be either the first or last bits in the packet for easier calculation.
   Checksums should not include itself in the calculation.
 
