@@ -7,3 +7,8 @@
 2018-12-28: Considering and testing out transmission via packets between Arduino and computer. Packets should have a type for the data/action/response and a checksum to verify that the data received is also (most likely) the data sent. We don't want data corruption or sync error to mess with alarm security (maybe this is overkill, but fun nevertheless).
             Checksums should be either the first or last bits in the packet for easier calculation.
             Checksums should not include itself in the calculation.
+2018-12-29: Writing basics for keypad interaction. I want a stirng for the pin itself and an additional char for the options
+            A and B. Also, to make it work like an actual pin code keypad we'll need to manage digit "overflow", i.e if I type 1234567, we'll want only 234567 (6 digits is pincode maxlength) to be sent. When a digit is typed, we'll check if max length is already reached, remove the first digit and then just add the new one
+            Implemented basic serial communication using packets with checksums, sending typed in pin code successfully.
+            Made a class for the piezo speaker
+            Made a non-blocking blink method for LED class (still need to call this is the Arduino main loop though)
