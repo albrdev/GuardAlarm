@@ -1,18 +1,14 @@
 #include <Keypad.h>
-#include <LiquidCrystal.h>
+#include <util/crc16.h>
 #include "LED.hpp"
 #include "Button.hpp"
-
-int speakerPin = 3;
-
-int buttonPushCounter = 0;   // counter for the number of button presses
-int buttonState = 0;         // current state of the button
-int lastButtonState = 0;     // previous state of the button
+#include "Speaker.hpp"
 
 LED ledRed(A0, true);
 LED ledYellow(A1, true);
 LED ledGreen(A2, true);
 Button button(2);
+Speaker speaker(3);
 
 const byte rows = 4;
 const byte cols = 4;
@@ -28,71 +24,149 @@ byte rowPins[rows] = { 10, 11, 12, 13 };
 byte colPins[cols] = { 6, 7, 8, 9 };
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 
-/*const int rs = A0, en = A1, d4 = A2, d5 = A3, d6 = A4, d7 = A5;
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);*/
+const int PINCODE_MINLENGTH = 4;
+const int PINCODE_MAXLENGTH = 6;
+
+const char options[] = "ABCD";
 
 void alarm(void)
 {
-    //beep2(speakerPin, 512, 1024, 10, 5);
-    //beep3(speakerPin, 1024, 512, 10, 5);
-    Beep(speakerPin, 512, 1024, 2500);
-    Beep(speakerPin, 1024, 512, 2500);
+    speaker.Siren(512, 1024, 5000);
+}
+
+enum TransmitType
+{
+    TT_ERROR = 0,
+    TT_SUCCESS = 1,
+    TT_EMERGENCY = 1,
+    TT_PIN = 3
+};
+
+typedef struct __attribute__((packed)) packet
+{
+    uint16_t checksum;
+    uint8_t type;
+} packet;
+
+typedef struct __attribute__((packed)) packet_pincode
+{
+    uint16_t checksum;
+    uint8_t type;
+
+    uint16_t size;
+    uint8_t data[6];
+} packet_pincode_t;
+
+typedef struct __attribute__((packed)) packet_i32
+{
+    uint16_t checksum;
+    uint8_t type;
+
+    uint32_t value;
+} packet_i32_t;
+
+packet p;
+
+uint16_t calcCRC(const uint8_t *s, const uint16_t size)
+{
+    uint16_t crc = 0; // starting value as you like, must be the same before each calculation
+    for(uint16_t i = 0U; i < size; i++) // for each character in the string
+    {
+        crc = _crc16_update(crc, s[i]); // update the crc value
+    }
+    return crc;
+}
+
+uint16_t checksum(const uint8_t *s, const uint16_t size)
+{
+    uint16_t c = 0;
+    for(uint16_t i = 0U; i < size; i++)
+    {
+        c ^= *s++;
+    }
+
+    return c;
+}
+
+String pinInput;
+char pinOption;
+char pin[] = "0123";
+char dataa[255];
+unsigned long int delayTime = 100UL;
+
+void setPacket(void *const pkt, const uint16_t size, const uint8_t type)
+{
+    packet *pp = (packet *)pkt;
+    pp->type = type;
+
+    // Checmsum has to be calculated last
+    // Checmsum can't be taken into account for the checksum itself, therefore start at an offset to avoid it
+    // The length of the data to be calculated over is now total size minus the checksum size to avoid going outside allowed memory
+
+    // Packet in bits: C = checksum, T = type, D = data (size may vary)
+    // CCCCCCCCCCCCCCCCTTTTTTTTDDDDDDDDDDDDDDDD
+    //                 ^---------------------->| size - sizeof(checksum)
+
+    pp->checksum = calcCRC((uint8_t *)pp + sizeof(pp->checksum), size - sizeof(pp->checksum));
 }
 
 void setup()
 {
+    pinInput.reserve(PINCODE_MAXLENGTH);
     button.SetPushCallback(alarm);
 
-    pinMode(speakerPin, OUTPUT);
     Serial.begin(9600);
 
-    /*lcd.begin(16, 2);
-    lcd.print("Hello World!");*/
+    setPacket(&p, sizeof(p), 1);
 }
 
 void loop()
 {
     button.Poll();
 
-    ledRed.Blink(5, 100);
-    ledYellow.Blink(5, 100);
-    ledGreen.Blink(5, 100);
+    //ledRed.Blink(true, 100);
+    //ledYellow.Blink(true, 100);
+    //ledGreen.Blink(true, 100);
 
     char key = keypad.getKey();
     if(key != '\0')
     {
-        Serial.print("Key: ");
-        Serial.println(key);
-    }
-}
+        if(strchr(options, key) != NULL)
+        {
+            pinOption = key;
+            pinInput = "";
+        }
+        else if(key == '#')
+        {
+            if(pinInput.length() >= PINCODE_MINLENGTH && pinInput.length() <= PINCODE_MAXLENGTH)
+            {
+                packet_pincode_t pp;
+                memcpy(pp.data, pinInput.c_str(), pinInput.length());
+                pp.size = pinInput.length();
+                setPacket(&pp, sizeof(pp), TT_PIN);
 
-float lerp(float v0, float v1, unsigned long t)
-{
-    return (1 - t) * v0 + t * v1;
-}
+                Serial.write((const char *)&pp, sizeof(pp));
+                Serial.flush();
+                speaker.Beep(512, 100);
+            }
+            else
+            {
+                speaker.Beep(1024, 100);
+            }
 
-float Lerp(float start, float end, float percent)
-{
-    return (start + percent * (end - start));
-}
+            pinOption = '\0';
+            pinInput = "";
+        }
+        else
+        {
+            while(pinInput.length() >= PINCODE_MAXLENGTH)
+            {
+                pinInput.remove(0, 1);
+            }
 
-int Lerp(int start, int end, float percent)
-{
-    return (start + percent * (end - start));
-}
+            pinInput.concat(key);
+        }
 
-void Beep(uint8_t pin, unsigned int a, unsigned int b, unsigned long int t)
-{
-    unsigned long int elapsedTime = 0UL;
-    unsigned long prevTime = millis();
-    while(elapsedTime < t)
-    {
-        unsigned int value = Lerp((int)a, (int)b, (float)elapsedTime / (float)t);
-        tone(pin, value, 10);
-        delay(5);
-
-        unsigned long int currentTime = millis();
-        elapsedTime += currentTime - prevTime;
-        prevTime = currentTime;
+        delay(delayTime);
     }
 }
