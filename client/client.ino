@@ -122,7 +122,7 @@ void setup()
 
 void loop()
 {
-    button.Poll();
+    button.Update();
 
     //ledRed.Blink(true, 100);
     //ledYellow.Blink(true, 100);

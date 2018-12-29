@@ -20,7 +20,7 @@ public:
     void SetReleaseCallback(void(*value)(void));
     void SetHoldCallback(void(*value)(void));
 
-    void Poll(void);
+    void Update(void);
 
     Button(uint8_t pin);
 };

@@ -21,7 +21,7 @@ void Button::SetHoldCallback(void(*value)(void))
     m_HoldCallback = value;
 }
 
-void Button::Poll(void)
+void Button::Update(void)
 {
     bool state = digitalRead(m_Pin);
     if(state != m_State)
