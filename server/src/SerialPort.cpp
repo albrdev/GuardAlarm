@@ -1,4 +1,7 @@
 #include "SerialPort.hpp"
+#include <string>
+
+constexpr char SerialPort::PORTNAME_PREFIX[4 + 1];
 
 bool SerialPort::IsConnected()
 {
@@ -12,7 +15,9 @@ bool SerialPort::Open(const char *const portName)
         Close();
     }
 
-    m_Handle = CreateFileA(static_cast<LPCSTR>(portName), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    std::string tmpPortName(SerialPort::PORTNAME_PREFIX);
+    tmpPortName.append(portName);
+    m_Handle = CreateFileA(static_cast<LPCSTR>(tmpPortName.c_str()), GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
     if(m_Handle == INVALID_HANDLE_VALUE)
     {
         return false;
@@ -50,7 +55,7 @@ void SerialPort::Close(void)
     }
 }
 
-int SerialPort::Read(char *buffer, unsigned int buf_size)
+int SerialPort::Read(char *const buffer, const long unsigned int buf_size)
 {
     DWORD bytesRead;
     unsigned int toRead;
@@ -74,7 +79,7 @@ int SerialPort::Read(char *buffer, unsigned int buf_size)
     return bytesRead;
 }
 
-bool SerialPort::Write(const char *buffer, unsigned int size)
+bool SerialPort::Write(const char *const buffer, const long unsigned int size)
 {
     DWORD bytesSent;
 
@@ -94,9 +99,9 @@ SerialPort::SerialPort(const char *const portName)
         fprintf(stderr, "Error: %ld\n", GetLastError());
         throw;
     }
-
-    Sleep(ARDUINO_WAIT_TIME);
 }
+
+SerialPort::SerialPort(void) { }
 
 SerialPort::~SerialPort(void)
 {
