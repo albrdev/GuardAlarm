@@ -20,3 +20,6 @@
   Implemented basic serial communication using packets with checksums, sending typed in pin code successfully.
   Made a class for the piezo speaker
   Made a non-blocking blink method for LED class (still need to call this is the Arduino main loop though)
+
+[2018-12-29]
+  According to https://hackingmajenkoblog.wordpress.com/2016/02/04/the-evils-of-arduino-strings/, the Arduino String class is a bad choice due to dynamic memory allocation. So I created a PIN class that has a static size of 6 + 1 bytes allocated for the PIN code
