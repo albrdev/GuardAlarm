@@ -23,3 +23,11 @@
 
 [2018-12-29]
   According to https://hackingmajenkoblog.wordpress.com/2016/02/04/the-evils-of-arduino-strings/, the Arduino String class is a bad choice due to dynamic memory allocation. So I created a PIN class that has a static size of 6 + 1 bytes allocated for the PIN code
+  Code refactoring
+
+[2018-12-30]
+  Added SerialPort class into the project, modified/cleaned it up a bit.
+  Changed all C++ header file extensions from 'h' to 'hpp'
+  Put packet management in its own source file and added include dir in Makefile to take this file into account (It's a shared header between client/server code, they both need it)
+  Tested transmissions between client/server, both ways seems to work fine except rarely theres what I think is an sync problem (CRC checksum failed, and got some scrambled data) (only happened in the first pin code transmission so far, not very often)
+  Also I need to fix output on the server side (some stdout and stderr screws up, and wont prints until I terminate the program using CTRL+C, which is odd considering that I removed buffered output for stderr and tried to flush stdout)
