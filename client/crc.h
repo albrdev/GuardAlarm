@@ -9,7 +9,7 @@ extern "C"
 {
 #endif
 
-uint16_t mkcrc16(const uint8_t *data, const size_t size);
+    uint16_t mkcrc16(const uint8_t *data, const size_t size);
 
 #ifdef __cplusplus
 } // extern "C"
