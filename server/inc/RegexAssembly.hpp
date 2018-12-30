@@ -1,5 +1,5 @@
-#ifndef _REGEXASSEMBLY_H_
-#define _REGEXASSEMBLY_H_
+#ifndef _REGEXASSEMBLY_HPP_
+#define _REGEXASSEMBLY_HPP_
 
 #include <string>
 #include <regex>
@@ -39,4 +39,4 @@ public:
     RegexAssembly(void);
 };
 
-#endif // _REGEXASSEMBLY_H_
+#endif // _REGEXASSEMBLY_HPP_

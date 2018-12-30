@@ -1,13 +1,13 @@
-#ifndef _LOGTABLE_H_
-#define _LOGTABLE_H_
+#ifndef _LOGTABLE_HPP_
+#define _LOGTABLE_HPP_
 
 #include <cstdlib>
 #include <fstream>
 #include <vector>
-#include "Generic.h"
-#include "Table.h"
-#include "LogEntry.h"
-#include "RegexAssembly.h"
+#include "Generic.hpp"
+#include "Table.hpp"
+#include "LogEntry.hpp"
+#include "RegexAssembly.hpp"
 
 class LogTable : public Table<LogEntry>
 {
@@ -26,4 +26,4 @@ public:
     LogTable(void);
 };
 
-#endif // _LOGTABLE_H_
+#endif // _LOGTABLE_HPP_

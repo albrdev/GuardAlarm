@@ -1,12 +1,12 @@
-#ifndef _SENSORENTRY_H_
-#define _SENSORENTRY_H_
+#ifndef _SENSORENTRY_HPP_
+#define _SENSORENTRY_HPP_
 
 #include <ctime>
 #include <string>
 #include <sstream>
-#include "Generic.h"
-#include "Entry.h"
-#include "RegexAssembly.h"
+#include "Generic.hpp"
+#include "Entry.hpp"
+#include "RegexAssembly.hpp"
 
 enum SensorStatus
 {
@@ -50,4 +50,4 @@ public:
     SensorEntry(void);
 };
 
-#endif // _SENSORENTRY_H_
+#endif // _SENSORENTRY_HPP_

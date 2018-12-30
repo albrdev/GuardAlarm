@@ -1,13 +1,13 @@
-#ifndef _SENSORTABLE_H_
-#define _SENSORTABLE_H_
+#ifndef _SENSORTABLE_HPP_
+#define _SENSORTABLE_HPP_
 
 #include <cstdlib>
 #include <fstream>
 #include <vector>
-#include "Generic.h"
-#include "Table.h"
-#include "SensorEntry.h"
-#include "RegexAssembly.h"
+#include "Generic.hpp"
+#include "Table.hpp"
+#include "SensorEntry.hpp"
+#include "RegexAssembly.hpp"
 
 class SensorTable : public Table<SensorEntry>
 {
@@ -26,4 +26,4 @@ public:
     SensorTable(void);
 };
 
-#endif // _SENSORTABLE_H_
+#endif // _SENSORTABLE_HPP_

@@ -1,12 +1,12 @@
-#ifndef _LOGENTRY_H_
-#define _LOGENTRY_H_
+#ifndef _LOGENTRY_HPP_
+#define _LOGENTRY_HPP_
 
 #include <ctime>
 #include <string>
 #include <sstream>
-#include "Generic.h"
-#include "Entry.h"
-#include "RegexAssembly.h"
+#include "Generic.hpp"
+#include "Entry.hpp"
+#include "RegexAssembly.hpp"
 
 class LogEntry : public Entry
 {
@@ -55,4 +55,4 @@ public:
     LogEntry(void);
 };
 
-#endif // _LOGENTRY_H_
+#endif // _LOGENTRY_HPP_

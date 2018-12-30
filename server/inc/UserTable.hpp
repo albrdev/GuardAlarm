@@ -1,13 +1,13 @@
-#ifndef _USERTABLE_H_
-#define _USERTABLE_H_
+#ifndef _USERTABLE_HPP_
+#define _USERTABLE_HPP_
 
 #include <cstdlib>
 #include <fstream>
 #include <vector>
-#include "Generic.h"
-#include "Table.h"
-#include "UserEntry.h"
-#include "RegexAssembly.h"
+#include "Generic.hpp"
+#include "Table.hpp"
+#include "UserEntry.hpp"
+#include "RegexAssembly.hpp"
 
 class UserTable : public Table<UserEntry>
 {
@@ -30,4 +30,4 @@ public:
     UserTable(void);
 };
 
-#endif // _USERTABLE_H_
+#endif // _USERTABLE_HPP_

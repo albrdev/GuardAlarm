@@ -1,4 +1,4 @@
-#include "Misc.h"
+#include "misc.hpp"
 
 /*
     userLogin: Finds user in the table and checks if password is correct

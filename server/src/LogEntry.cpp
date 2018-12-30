@@ -1,4 +1,4 @@
-#include "LogEntry.h"
+#include "LogEntry.hpp"
 
 int LogEntry::s_NextID = 0;
 

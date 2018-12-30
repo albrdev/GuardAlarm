@@ -1,9 +1,9 @@
-#ifndef _LOGGER_H_
-#define _LOGGER_H_
+#ifndef _LOGGER_HPP_
+#define _LOGGER_HPP_
 
 #include <string>
 #include <fstream>
-#include "LogEntry.h"
+#include "LogEntry.hpp"
 
 /*
     Class used for writing logs and automatically closes the file
@@ -31,4 +31,4 @@ public:
     ~Logger(void);
 };
 
-#endif // _LOGGER_H_
+#endif // _LOGGER_HPP_

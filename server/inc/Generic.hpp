@@ -1,5 +1,5 @@
-#ifndef _GENERIC_H_
-#define _GENERIC_H_
+#ifndef _GENERIC_HPP_
+#define _GENERIC_HPP_
 
 #include <cstring>
 #include <ctime>
@@ -21,4 +21,4 @@ template<typename T> std::string ToString(const T& value);
 template<typename T> T FromString(const std::string& str);
 template<typename T> bool FromString(const std::string& str, T& result);
 
-#endif // _GENERIC_H_
+#endif // _GENERIC_HPP_

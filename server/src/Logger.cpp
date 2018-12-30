@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "Logger.hpp"
 
 std::string Logger::GetFilePath(void) const { return m_FilePath; }
 std::ios_base::openmode Logger::GetMode(void) const { return m_Mode; }

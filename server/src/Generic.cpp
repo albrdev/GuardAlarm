@@ -1,4 +1,4 @@
-#include "Generic.h"
+#include "Generic.hpp"
 
 /*
     readString: Reads a string from standard input stream

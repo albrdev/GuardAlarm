@@ -1,9 +1,9 @@
-#ifndef _ENTRY_H_
-#define _ENTRY_H_
+#ifndef _ENTRY_HPP_
+#define _ENTRY_HPP_
 
 #include <string>
 #include <sstream>
-#include "RegexAssembly.h"
+#include "RegexAssembly.hpp"
 
 class Entry
 {
@@ -31,4 +31,4 @@ public:
     Entry(void);
 };
 
-#endif // _ENTRY_H_
+#endif // _ENTRY_HPP_

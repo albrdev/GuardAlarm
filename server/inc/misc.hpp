@@ -1,12 +1,12 @@
-#ifndef _MISC_H_
-#define _MISC_H_
+#ifndef _MISC_HPP_
+#define _MISC_HPP_
 
 #include <cstdio>
 #include <ctime>
 #include <string>
-#include "UserEntry.h"
-#include "UserTable.h"
-#include "Logger.h"
+#include "UserEntry.hpp"
+#include "UserTable.hpp"
+#include "Logger.hpp"
 
 /*
     AuthStatus: An enum for representing login status
@@ -45,4 +45,4 @@ void userSession(UserEntry* userentry, bool& isAlarmed, Logger& logger);
 
 std::string statusString(bool isOn);
 
-#endif // _MISC_H_
+#endif // _MISC_HPP_

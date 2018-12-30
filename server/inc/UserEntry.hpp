@@ -1,10 +1,10 @@
-#ifndef _USERENTRY_H_
-#define _USERENTRY_H_
+#ifndef _USERENTRY_HPP_
+#define _USERENTRY_HPP_
 
 #include <string>
 #include <sstream>
-#include "Entry.h"
-#include "RegexAssembly.h"
+#include "Entry.hpp"
+#include "RegexAssembly.hpp"
 
 class UserTable;
 
@@ -70,4 +70,4 @@ public:
     UserEntry(void);
 };
 
-#endif // _USERENTRY_H_
+#endif // _USERENTRY_HPP_

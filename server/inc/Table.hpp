@@ -1,12 +1,12 @@
-#ifndef _TABLE_H_
-#define _TABLE_H_
+#ifndef _TABLE_HPP_
+#define _TABLE_HPP_
 
 #include <cstdlib>
 #include <fstream>
 #include <vector>
-#include "Generic.h"
-#include "RegexAssembly.h"
-#include "Entry.h"
+#include "Generic.hpp"
+#include "RegexAssembly.hpp"
+#include "Entry.hpp"
 
 template <typename T>
 class Table
@@ -44,4 +44,4 @@ public:
     Table(void) { }
 };
 
-#endif // _TABLE_H_
+#endif // _TABLE_HPP_

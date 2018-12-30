@@ -1,4 +1,4 @@
-#include "LogTable.h"
+#include "LogTable.hpp"
 
 // Regex explanation:
 // ^\s*([0-9]+)\s*;\s*([0-9]{4}\.[0-9]{2}\.[0-9]{2}\s+[0-9]{2}:[0-9]{2}:[0-9]{2})\s*;\s*([0-9]+)\s*;\s*([^\s;]*)\s*;\s*(\S.+?)\s*$
