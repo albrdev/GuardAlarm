@@ -10,6 +10,7 @@ DIR_INC		:= inc
 DIR_SRC		:= src
 DIR_OBJ		:= obj
 DIR_BIN		:= bin
+DIR_CLI		:= ../client
 
 BIN			:= gad.exe
 
@@ -56,7 +57,7 @@ $(DIR_BIN)/$(BIN): $(OBJS)
 	$(CC_CPP) $(OBJS) $(CC_LIBS) -o $(DIR_BIN)/$(BIN)
 
 $(DIR_OBJ)/main.o: $(DIR_SRC)/main.cpp
-	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -D__USE_MINGW_ANSI_STDIO=1 -c $< -o $@
+	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -I$(DIR_CLI) -D__USE_MINGW_ANSI_STDIO=1 -c $< -o $@
   
 $(DIR_OBJ)/misc.o: $(DIR_SRC)/misc.cpp $(DIR_INC)/misc.hpp
 	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
@@ -100,5 +101,5 @@ $(DIR_OBJ)/Generic.o: $(DIR_SRC)/Generic.cpp $(DIR_INC)/Generic.hpp
 $(DIR_OBJ)/packet.o: ../client/packet.c ../client/packet.h
 	$(CC_C) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
-$(DIR_OBJ)/crc.o: ../client/crc.c ../client/crc.h
+$(DIR_OBJ)/crc.o: $(DIR_CLI)/crc.c $(DIR_CLI)/crc.h
 	$(CC_C) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@

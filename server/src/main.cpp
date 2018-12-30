@@ -1,11 +1,18 @@
-#include <iostream>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 #include <ctime>
 #include "SerialPort.hpp"
-#include "C:/Users/floff/dev/gitlab/albrdev/GuardAlarm/client/crc.h"
-#include "C:/Users/floff/dev/gitlab/albrdev/GuardAlarm/client/packet.h"
+#include "UserEntry.hpp"
+#include "UserTable.hpp"
+#include "LogEntry.hpp"
+#include "LogTable.hpp"
+#include "SensorEntry.hpp"
+#include "SensorTable.hpp"
+#include "Logger.hpp"
+#include "crc.h"
+#include "packet.h"
+#include "misc.hpp"
 
 char portID[] = "\\\\.\\COM10";
 char *portName = portID;
