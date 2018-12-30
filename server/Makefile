@@ -17,10 +17,15 @@ CMD_RM    := rm -f
 CMD_LN    := ln -sf
 CMD_PRINT := @printf
 
-SRCS	:= $(wildcard $(DIR_SRC)/*.cpp)
-OBJS	:= $(patsubst $(DIR_SRC)/%.cpp,$(DIR_OBJ)/%.o,$(SRCS))
+SRCS_C		:= $(wildcard $(DIR_SRC)/*.c)
+OBJS_C		:= $(patsubst $(DIR_SRC)/%.c,$(DIR_OBJ)/%.o,$(SRCS_C))
 
-OBJS	+= $(DIR_OBJ)/crc.o $(DIR_OBJ)/packet.o
+OBJS_C		+= $(DIR_OBJ)/crc.o $(DIR_OBJ)/packet.o
+
+SCRS_CPP	:= $(wildcard $(DIR_SRC)/*.cpp)
+OBJS_CPP	:= $(patsubst $(DIR_SRC)/%.cpp,$(DIR_OBJ)/%.o,$(SCRS_CPP))
+
+OBJS		:= $(OBJS_C) $(OBJS_CPP)
 
 .PHONY: all
 all: debug
