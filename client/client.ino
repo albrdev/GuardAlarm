@@ -7,9 +7,9 @@
 #include "Speaker.hpp"
 #include "packet.h"
 
-LED ledRed(A0, true);
-LED ledYellow(A1, true);
-LED ledGreen(A2, true);
+LED ledRed(A0, false);
+LED ledYellow(A1, false);
+LED ledGreen(A2, false);
 Button button(2);
 Speaker speaker(3);
 
@@ -78,6 +78,40 @@ void loop()
                 Serial.write((const char *)&pp, sizeof(pp));
                 Serial.flush();
                 speaker.Beep(512, 100);
+
+                size_t size = Serial.readBytes(data, sizeof(data));
+                if(size < (int)sizeof(packet_header_t))
+                {
+                    if(size != 0)
+                    {
+                        speaker.Beep(1024, 100);
+                    }
+                }
+                else
+                {
+                    packet_header_t *pkt = (packet_header_t *)data;
+                    if(packet_verify(pkt, size, pkt->checksum))
+                    {
+                        if(pkt->type == PT_SUCCESS)
+                        {
+                            ledYellow.SetState(false);
+                            ledRed.SetState(false);
+                            ledGreen.SetState(true);
+                        }
+                        else if(pkt->type == PT_ERROR)
+                        {
+                            ledYellow.SetState(false);
+                            ledGreen.SetState(false);
+                            ledRed.SetState(true);
+                        }
+                    }
+                    else
+                    {
+                        ledRed.SetState(false);
+                        ledGreen.SetState(false);
+                        ledYellow.SetState(true);
+                    }
+                }
             }
             else
             {
