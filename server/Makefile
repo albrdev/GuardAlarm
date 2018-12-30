@@ -11,7 +11,7 @@ DIR_SRC		:= src
 DIR_OBJ		:= obj
 DIR_BIN		:= bin
 
-BIN			:= alarm.exe
+BIN			:= gad.exe
 
 CMD_CP    := cp -f
 CMD_RM    := rm -f
