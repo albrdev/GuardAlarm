@@ -1,8 +1,8 @@
 #include <Keypad.h>
-#include <util/crc16.h>
 #include "LED.hpp"
 #include "Button.hpp"
 #include "Speaker.hpp"
+#include "crc.h"
 
 LED ledRed(A0, true);
 LED ledYellow(A1, true);
@@ -39,16 +39,16 @@ enum TransmitType
     TT_ERROR = 0,
     TT_SUCCESS = 1,
     TT_EMERGENCY = 1,
-    TT_PIN = 3
+    TT_LOGIN = 3
 };
 
-typedef struct __attribute__((packed)) packet
+typedef struct __attribute__((packed)) _packet_header
 {
     uint16_t checksum;
     uint8_t type;
-} packet;
+} packet_header_t;
 
-typedef struct __attribute__((packed)) packet_pincode
+typedef struct __attribute__((packed)) _packet_pincode
 {
     uint16_t checksum;
     uint8_t type;
@@ -57,7 +57,7 @@ typedef struct __attribute__((packed)) packet_pincode
     uint8_t data[6];
 } packet_pincode_t;
 
-typedef struct __attribute__((packed)) packet_i32
+typedef struct __attribute__((packed)) _packet_i32
 {
     uint16_t checksum;
     uint8_t type;
@@ -65,28 +65,7 @@ typedef struct __attribute__((packed)) packet_i32
     uint32_t value;
 } packet_i32_t;
 
-packet p;
-
-uint16_t calcCRC(const uint8_t *s, const uint16_t size)
-{
-    uint16_t crc = 0; // starting value as you like, must be the same before each calculation
-    for(uint16_t i = 0U; i < size; i++) // for each character in the string
-    {
-        crc = _crc16_update(crc, s[i]); // update the crc value
-    }
-    return crc;
-}
-
-uint16_t checksum(const uint8_t *s, const uint16_t size)
-{
-    uint16_t c = 0;
-    for(uint16_t i = 0U; i < size; i++)
-    {
-        c ^= *s++;
-    }
-
-    return c;
-}
+packet_header_t p;
 
 String pinInput;
 char pinOption;
@@ -96,7 +75,7 @@ unsigned long int delayTime = 100UL;
 
 void setPacket(void *const pkt, const uint16_t size, const uint8_t type)
 {
-    packet *pp = (packet *)pkt;
+    packet_header_t *pp = (packet_header_t *)pkt;
     pp->type = type;
 
     // Checmsum has to be calculated last
@@ -107,7 +86,7 @@ void setPacket(void *const pkt, const uint16_t size, const uint8_t type)
     // CCCCCCCCCCCCCCCCTTTTTTTTDDDDDDDDDDDDDDDD
     //                 ^---------------------->| size - sizeof(checksum)
 
-    pp->checksum = calcCRC((uint8_t *)pp + sizeof(pp->checksum), size - sizeof(pp->checksum));
+    pp->checksum = mkcrc16((uint8_t *)pp + sizeof(pp->checksum), size - sizeof(pp->checksum));
 }
 
 void setup()
@@ -143,7 +122,7 @@ void loop()
                 packet_pincode_t pp;
                 memcpy(pp.data, pinInput.c_str(), pinInput.length());
                 pp.size = pinInput.length();
-                setPacket(&pp, sizeof(pp), TT_PIN);
+                setPacket(&pp, sizeof(pp), TT_LOGIN);
 
                 Serial.write((const char *)&pp, sizeof(pp));
                 Serial.flush();
@@ -159,9 +138,9 @@ void loop()
         }
         else
         {
-            while(pinInput.length() >= PINCODE_MAXLENGTH)
+            if(pinInput.length() >= PINCODE_MAXLENGTH)
             {
-                pinInput.remove(0, 1);
+                pinInput.remove(0, pinInput.length() - (PINCODE_MAXLENGTH - 1));
             }
 
             pinInput.concat(key);
