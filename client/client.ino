@@ -1,4 +1,7 @@
+#include <stdlib.h>
+#include <string.h>
 #include <Keypad.h>
+#include "PIN.hpp"
 #include "LED.hpp"
 #include "Button.hpp"
 #include "Speaker.hpp"
@@ -24,59 +27,55 @@ byte rowPins[rows] = { 10, 11, 12, 13 };
 byte colPins[cols] = { 6, 7, 8, 9 };
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 
-const int PINCODE_MINLENGTH = 4;
-const int PINCODE_MAXLENGTH = 6;
+const char digits[] = "0123456789";
+const char options[] = {keys[0][3], keys[1][3], keys[2][3], keys[3][3], '\0'};
 
-const char options[] = "ABCD";
+PIN pinCode;
 
 void alarm(void)
 {
     speaker.Siren(512, 1024, 5000);
 }
 
-enum TransmitType
+enum PacketType
 {
-    TT_ERROR = 0,
-    TT_SUCCESS = 1,
-    TT_EMERGENCY = 1,
-    TT_LOGIN = 3
+    PT_ERROR = 0,
+    PT_SUCCESS = 1,
+    PT_EMERGENCY = 1,
+    PT_PIN = 3
 };
 
-typedef struct __attribute__((packed)) _packet_header
+typedef struct _packet_header packet_header_t;
+typedef struct _packet_pincode packet_pincode_t;
+typedef struct _packet_i32 packet_i32_t;
+
+struct __attribute__((packed)) _packet_header
 {
     uint16_t checksum;
     uint8_t type;
-} packet_header_t;
+};
 
-typedef struct __attribute__((packed)) _packet_pincode
+struct __attribute__((packed)) _packet_pincode
 {
-    uint16_t checksum;
-    uint8_t type;
+    packet_header_t header;
 
-    uint16_t size;
-    uint8_t data[6];
-} packet_pincode_t;
+    uint8_t pin[6 + 1];
+    uint8_t option;
+};
 
-typedef struct __attribute__((packed)) _packet_i32
+struct __attribute__((packed)) _packet_i32
 {
-    uint16_t checksum;
-    uint8_t type;
+    packet_header_t header;
 
     uint32_t value;
-} packet_i32_t;
+};
 
-packet_header_t p;
-
-String pinInput;
-char pinOption;
-char pin[] = "0123";
-char dataa[255];
+char data[256];
 unsigned long int delayTime = 100UL;
 
-void setPacket(void *const pkt, const uint16_t size, const uint8_t type)
+void packet_mkheader(struct _packet_header *const pkt, const uint16_t size, const uint8_t type)
 {
-    packet_header_t *pp = (packet_header_t *)pkt;
-    pp->type = type;
+    pkt->type = type;
 
     // Checmsum has to be calculated last
     // Checmsum can't be taken into account for the checksum itself, therefore start at an offset to avoid it
@@ -86,43 +85,53 @@ void setPacket(void *const pkt, const uint16_t size, const uint8_t type)
     // CCCCCCCCCCCCCCCCTTTTTTTTDDDDDDDDDDDDDDDD
     //                 ^---------------------->| size - sizeof(checksum)
 
-    pp->checksum = mkcrc16((uint8_t *)pp + sizeof(pp->checksum), size - sizeof(pp->checksum));
+    pkt->checksum = mkcrc16((uint8_t *)pkt + sizeof(pkt->checksum), size - sizeof(pkt->checksum));
+}
+
+void packet_mkpincode(struct _packet_pincode *const pkt, const uint8_t *const pin, const uint8_t option)
+{
+    size_t pinLen = strlen((const char *)pin);
+    memcpy(pkt->pin, pin, pinLen);
+    memset(pkt->pin + pinLen, 0, sizeof(pkt->pin) - pinLen);
+    pkt->option = option;
+
+    packet_mkheader(&pkt->header, sizeof(*pkt), PT_PIN);
 }
 
 void setup()
 {
-    pinInput.reserve(PINCODE_MAXLENGTH);
     button.SetPushCallback(alarm);
 
     Serial.begin(9600);
-
-    setPacket(&p, sizeof(p), 1);
 }
 
 void loop()
 {
     button.Update();
 
-    //ledRed.Blink(true, 100);
-    //ledYellow.Blink(true, 100);
-    //ledGreen.Blink(true, 100);
-
     char key = keypad.getKey();
     if(key != '\0')
     {
-        if(strchr(options, key) != NULL)
+        if(strchr(digits, key) != NULL)
         {
-            pinOption = key;
-            pinInput = "";
+            pinCode.Append(key);
+        }
+        else if(strchr(options, key) != NULL)
+        {
+            pinCode.Clear();
+            pinCode.SetOption(key);
+        }
+        else if(key == '*')
+        {
+            pinCode.Clear();
+            speaker.Beep(1024, 100);
         }
         else if(key == '#')
         {
-            if(pinInput.length() >= PINCODE_MINLENGTH && pinInput.length() <= PINCODE_MAXLENGTH)
+            if(pinCode.IsValid())
             {
                 packet_pincode_t pp;
-                memcpy(pp.data, pinInput.c_str(), pinInput.length());
-                pp.size = pinInput.length();
-                setPacket(&pp, sizeof(pp), TT_LOGIN);
+                packet_mkpincode(&pp, (const uint8_t *const)pinCode.GetContent(), pinCode.GetOption());
 
                 Serial.write((const char *)&pp, sizeof(pp));
                 Serial.flush();
@@ -133,17 +142,7 @@ void loop()
                 speaker.Beep(1024, 100);
             }
 
-            pinOption = '\0';
-            pinInput = "";
-        }
-        else
-        {
-            if(pinInput.length() >= PINCODE_MAXLENGTH)
-            {
-                pinInput.remove(0, pinInput.length() - (PINCODE_MAXLENGTH - 1));
-            }
-
-            pinInput.concat(key);
+            pinCode.Clear();
         }
 
         delay(delayTime);
