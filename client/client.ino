@@ -5,7 +5,7 @@
 #include "LED.hpp"
 #include "Button.hpp"
 #include "Speaker.hpp"
-#include "crc.h"
+#include "packet.h"
 
 LED ledRed(A0, true);
 LED ledYellow(A1, true);
@@ -28,7 +28,7 @@ byte colPins[cols] = { 6, 7, 8, 9 };
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 
 const char digits[] = "0123456789";
-const char options[] = {keys[0][3], keys[1][3], keys[2][3], keys[3][3], '\0'};
+const char modes[] = {keys[0][3], keys[1][3], keys[2][3], keys[3][3], '\0'};
 
 PIN pinCode;
 
@@ -37,66 +37,8 @@ void alarm(void)
     speaker.Siren(512, 1024, 5000);
 }
 
-enum PacketType
-{
-    PT_ERROR = 0,
-    PT_SUCCESS = 1,
-    PT_EMERGENCY = 1,
-    PT_PIN = 3
-};
-
-typedef struct _packet_header packet_header_t;
-typedef struct _packet_pincode packet_pincode_t;
-typedef struct _packet_i32 packet_i32_t;
-
-struct __attribute__((packed)) _packet_header
-{
-    uint16_t checksum;
-    uint8_t type;
-};
-
-struct __attribute__((packed)) _packet_pincode
-{
-    packet_header_t header;
-
-    uint8_t pin[6 + 1];
-    uint8_t option;
-};
-
-struct __attribute__((packed)) _packet_i32
-{
-    packet_header_t header;
-
-    uint32_t value;
-};
-
 char data[256];
 unsigned long int delayTime = 100UL;
-
-void packet_mkheader(struct _packet_header *const pkt, const uint16_t size, const uint8_t type)
-{
-    pkt->type = type;
-
-    // Checmsum has to be calculated last
-    // Checmsum can't be taken into account for the checksum itself, therefore start at an offset to avoid it
-    // The length of the data to be calculated over is now total size minus the checksum size to avoid going outside allowed memory
-
-    // Packet in bits: C = checksum, T = type, D = data (size may vary)
-    // CCCCCCCCCCCCCCCCTTTTTTTTDDDDDDDDDDDDDDDD
-    //                 ^---------------------->| size - sizeof(checksum)
-
-    pkt->checksum = mkcrc16((uint8_t *)pkt + sizeof(pkt->checksum), size - sizeof(pkt->checksum));
-}
-
-void packet_mkpincode(struct _packet_pincode *const pkt, const uint8_t *const pin, const uint8_t option)
-{
-    size_t pinLen = strlen((const char *)pin);
-    memcpy(pkt->pin, pin, pinLen);
-    memset(pkt->pin + pinLen, 0, sizeof(pkt->pin) - pinLen);
-    pkt->option = option;
-
-    packet_mkheader(&pkt->header, sizeof(*pkt), PT_PIN);
-}
 
 void setup()
 {
@@ -116,7 +58,7 @@ void loop()
         {
             pinCode.Append(key);
         }
-        else if(strchr(options, key) != NULL)
+        else if(strchr(modes, key) != NULL)
         {
             pinCode.Clear();
             pinCode.SetOption(key);
