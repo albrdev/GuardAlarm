@@ -1,9 +1,9 @@
-CC				:= g++
+CC			:= g++
 CC_FLAGS	:= -pedantic -Wall -Wextra -Wconversion
 CC_LIBS		:= 
 
-FLAGS_DBG := -g
-FLAGS_RLS := -DNDEBUG
+FLAGS_DBG	:= -g
+FLAGS_RLS	:= -DNDEBUG
 
 DIR_INC		:= inc
 DIR_SRC		:= src
@@ -19,6 +19,8 @@ CMD_PRINT := @printf
 
 SRCS	:= $(wildcard $(DIR_SRC)/*.cpp)
 OBJS	:= $(patsubst $(DIR_SRC)/%.cpp,$(DIR_OBJ)/%.o,$(SRCS))
+
+OBJS	+= $(DIR_OBJ)/crc.o $(DIR_OBJ)/packet.o
 
 .PHONY: all
 all: debug
@@ -53,6 +55,9 @@ $(DIR_OBJ)/Main.o: $(DIR_SRC)/Main.cpp
 $(DIR_OBJ)/Misc.o: $(DIR_SRC)/Misc.cpp $(DIR_INC)/Misc.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
+$(DIR_OBJ)/SerialPort.o: $(DIR_SRC)/SerialPort.cpp
+	$(CC) $(CC_FLAGS) -I$(DIR_INC) -D__USE_MINGW_ANSI_STDIO=1 -c $< -o $@
+
 $(DIR_OBJ)/Logger.o: $(DIR_SRC)/Logger.cpp $(DIR_INC)/Logger.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
@@ -84,4 +89,10 @@ $(DIR_OBJ)/RegexAssembly.o: $(DIR_SRC)/RegexAssembly.cpp $(DIR_INC)/RegexAssembl
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
   
 $(DIR_OBJ)/Generic.o: $(DIR_SRC)/Generic.cpp $(DIR_INC)/Generic.h
+	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
+
+$(DIR_OBJ)/packet.o: ../client/packet.c ../client/packet.h
+	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
+
+$(DIR_OBJ)/crc.o: ../client/crc.c ../client/crc.h
 	$(CC) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
