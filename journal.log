@@ -31,3 +31,11 @@
   Put packet management in its own source file and added include dir in Makefile to take this file into account (It's a shared header between client/server code, they both need it)
   Tested transmissions between client/server, both ways seems to work fine except rarely theres what I think is an sync problem (CRC checksum failed, and got some scrambled data) (only happened in the first pin code transmission so far, not very often)
   Also I need to fix output on the server side (some stdout and stderr screws up, and wont prints until I terminate the program using CTRL+C, which is odd considering that I removed buffered output for stderr and tried to flush stdout)
+
+[2019-01-02]
+  Made a sonic sensor and a derrived motion sensor class to detect motions. It can automatically set a monitoring distance at startup and continiously checking if the distance has changed (you could set a difference threshold to which it will detect any change, let's say we are monitoring at a distance of x meters and we have a threshold of 0.2m, the motion detector will trigger on x ± 0.2m)
+  Motion detector could also fail. Sometimes it will give back random weird values (maybe due to the signal bouncing of several object with different distances (plain wall or surface worked better)), this could be fixed by setting timeout in pulseIn function and it would return 0 instead, but 0 is also returned when power circuit has been broken, so to handle that i've been measuring how long only zeroes has been returned, if too long there's a sensor failure
+  Changing outer sensor circuit linking to be always HIGH, then LOW when triggered (button is pressed) (https://www.arduino.cc/en/tutorial/button)
+  Editing client source to test new stuff
+  Adding reset button to turn of alarm (testing purposes only)
+  Adding beep to keypad presses (we don't want different sound for different keys, because someone could theoretically listen to what keys you press)
