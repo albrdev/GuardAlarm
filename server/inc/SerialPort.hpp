@@ -3,9 +3,10 @@
 
 #define MAX_DATA_LENGTH 256
 
+#include <cstdlib>
+#include <cstdint>
+#include <cstdio>
 #include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 class SerialPort
 {
@@ -21,6 +22,9 @@ class SerialPort
         bool IsConnected(void);
         bool Open(const char *const portName);
         void Close(void);
+
+        bool Available(void);
+        long unsigned int AvailableBytes(void);
 
         int Read(char *const buffer, const long unsigned int buf_size);
         bool Write(const char *const buffer, const long unsigned int buf_size);

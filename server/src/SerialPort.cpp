@@ -55,6 +55,17 @@ void SerialPort::Close(void)
     }
 }
 
+bool SerialPort::Available(void)
+{
+    return AvailableBytes() > 0UL;
+}
+
+long unsigned int SerialPort::AvailableBytes(void)
+{
+    ClearCommError(m_Handle, &m_Error, &m_ComStat);
+    return m_ComStat.cbInQue;
+}
+
 int SerialPort::Read(char *const buffer, const long unsigned int buf_size)
 {
     DWORD bytesRead;
@@ -63,11 +74,10 @@ int SerialPort::Read(char *const buffer, const long unsigned int buf_size)
     SetLastError(ERROR_SUCCESS);
     ClearCommError(m_Handle, &m_Error, &m_ComStat);
 
-    if(m_ComStat.cbInQue > 0)
-    {
-        toRead = m_ComStat.cbInQue > buf_size ? buf_size : m_ComStat.cbInQue;
-    }
+    if(m_ComStat.cbInQue <= 0)
+        return 0;
 
+    toRead = m_ComStat.cbInQue > buf_size ? buf_size : m_ComStat.cbInQue;
     if(!ReadFile(m_Handle, buffer, toRead, &bytesRead, NULL))
     {
         int error = GetLastError();
