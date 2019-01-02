@@ -15,14 +15,14 @@ size_t PIN::GetLength(void) const
     return m_Length;
 }
 
-char PIN::GetOption(void) const
+char PIN::GetMode(void) const
 {
-    return m_Option;
+    return m_Mode;
 }
 
-void PIN::SetOption(const char value)
+void PIN::SetMode(const char value)
 {
-    m_Option = value;
+    m_Mode = value;
 }
 
 bool PIN::IsValid(void) const
@@ -52,13 +52,13 @@ void PIN::Clear(void)
 {
     memset(m_Content, '\0', sizeof(m_Content));
     m_Length = 0U;
-    m_Option = '\0';
+    m_Mode = '\0';
 }
 
 PIN::PIN(const char *const pin, const char option)
 {
     SetContent(pin);
-    SetOption(option);
+    SetMode(option);
 }
 
 PIN::PIN(const char *const pin)
