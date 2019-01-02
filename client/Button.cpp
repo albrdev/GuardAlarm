@@ -3,7 +3,7 @@
 
 bool Button::GetState(void) const
 {
-    return m_State;
+    return digitalRead(m_Pin);
 }
 
 void Button::SetPushCallback(void(*value)(void))
