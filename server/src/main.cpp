@@ -70,7 +70,7 @@ int main(void)
             {
                 if(size != 0)
                 {
-                    fprintf(stderr, "Error: Invalid packet size\n");
+                    fprintf(stderr, "Error: Invalid packet size: %d\n", size);
                     fflush(stderr);
                 }
 
@@ -105,19 +105,23 @@ int main(void)
                         //attemptedLogins = 0; // Successfull login, clear login attempts
                         //isAlarmed = false; // Turn off alarm
 
+                        uint8_t type;
                         if((statusFlags & AuthStatus::Emergency) != 0) // Check if AS_EMERGENCY bit is also set
                         {
+                            type = PT_EMERGENCY;
                             // Call emergency function (this function should not print or alert somehow, just completly quiet, but not in this very test case)
                             logger.WriteCSV(LogEntry(time(NULL), userEntry->GetID(), "Emergency code entered: Notifying the authorities!"));
                             //emergencyResponse();
-                            // Continue as usual with the menu (to not startle the possible attacker(s))
+                            // Continue as usual (to not startle the possible attacker(s))
                         }
                         else
                         {
-                            packet_header_t pp;
-                            packet_mkheader(&pp, sizeof(pp), PT_SUCCESS);
-                            serialPort.Write((const char *)&pp, sizeof(pp));
+                            type = PT_SUCCESS;
                         }
+
+                        packet_header_t pp;
+                        packet_mkheader(&pp, sizeof(pp), type);
+                        serialPort.Write((const char *)&pp, sizeof(pp));
 
                         //userSession(userEntry, isAlarmed, logger);
                     }
