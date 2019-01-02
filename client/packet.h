@@ -11,14 +11,22 @@ enum PacketType
 {
     PT_ERROR = 0,
     PT_SUCCESS = 1,
-    PT_EMERGENCY = 1,
-    PT_PIN = 3
+    PT_EMERGENCY = 2,
+    PT_SENSORSTATUS = 3,
+    PT_PIN = 4,
 };
 
 struct __attribute__((packed)) _packet_header
 {
     uint16_t checksum;
     uint8_t type;
+};
+
+struct __attribute__((packed)) _packet_sensorstatus
+{
+    packet_header_t header;
+
+    uint8_t status;
 };
 
 struct __attribute__((packed)) _packet_pincode
