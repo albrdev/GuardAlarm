@@ -12,7 +12,7 @@ public:
 private:
     char m_Content[PIN::MAXLENGTH + 1U] = { '\0' };
     size_t m_Length = 0U;
-    char m_Option = '\0';
+    char m_Mode = '\0';
 
 public:
     const char *const GetContent(void) const;
@@ -20,8 +20,8 @@ public:
 
     size_t GetLength(void) const;
 
-    char GetOption(void) const;
-    void SetOption(const char value);
+    char GetMode(void) const;
+    void SetMode(const char value);
 
     bool IsValid(void) const;
 
