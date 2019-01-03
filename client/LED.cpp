@@ -6,45 +6,84 @@ bool LED::GetState(void) const
     return m_State;
 }
 
-void LED::SetState(const bool value)
+void LED::_SetState(const bool value)
 {
     m_State = value;
     digitalWrite(m_Pin, m_State ? HIGH : LOW);
 }
 
-void LED::Blink(const int count, const unsigned long int duration)
+void LED::SetState(const bool value)
 {
-    Blink(count, duration, duration);
+    Stop();
+    _SetState(value);
 }
 
-void LED::Blink(const int count, const unsigned long int duration1, const unsigned long int duration2)
+void LED::InitBlink(const bool initialState)
 {
-    bool initialState = m_State;
-
-    for(int i = 0; i < count; i++)
-    {
-        SetState(!m_State);
-        delay(duration1);
-        SetState(!m_State);
-        delay(duration2);
-    }
-
+    Stop();
     SetState(initialState);
+
+    m_Count = 0U;
+    m_ElapsedTime = 0U;
+    m_StateChangePoint = 0U;
+    m_InitialState = m_State;
+    m_Active = true;
 }
 
-void LED::Blink(const bool blink, const unsigned long int duration)
+void LED::CountedBlink(const unsigned int count, const unsigned long int blinkDuration, bool initialState)
 {
-    if(!blink)
+    m_Mode = BlinkMode::BM_COUNT;
+    m_MaxCount = count >= 0 ? count * 2 : -1;
+    m_Duration = blinkDuration;
+    InitBlink(initialState);
+}
+
+void LED::TimedBlink(const unsigned long int totalDuration, const unsigned long int blinkDuration, bool initialState)
+{
+    m_Mode = BlinkMode::BM_TIME;
+    m_EndTime = totalDuration;
+    m_Duration = blinkDuration;
+    InitBlink(initialState);
+}
+
+void LED::Blink(const unsigned int count, const unsigned long int totalDuration, const unsigned long int blinkDuration, bool initialState)
+{
+    m_Mode = BlinkMode::BM_COUNT | BlinkMode::BM_TIME;
+    m_MaxCount = count * 2;
+    m_EndTime = totalDuration;
+    m_Duration = blinkDuration;
+    InitBlink(initialState);
+}
+
+void LED::Blink(const unsigned long int blinkDuration, bool initialState)
+{
+    m_Mode = BlinkMode::BM_NONE;
+    m_Duration = blinkDuration;
+    InitBlink(initialState);
+}
+
+void LED::Stop(void)
+{
+    if(!m_Active) return;
+
+    SetState(m_InitialState);
+    m_Active = false;
+}
+
+void LED::Update(void)
+{
+    unsigned long int time = millis();
+    if((m_Mode & BlinkMode::BM_COUNT && m_Count >= m_MaxCount) || (m_Mode & BlinkMode::BM_TIME && time >= m_EndTime))
     {
-        nextState = 0UL;
+        Stop();
         return;
     }
 
-    unsigned long int now = millis();
-    if(now >= nextState)
+    if(time >= m_StateChangePoint)
     {
-        SetState(!m_State);
-        nextState = now + duration;
+        _SetState(!GetState());
+        m_StateChangePoint = time + m_Duration;
+        m_Count++;
     }
 }
 
