@@ -51,5 +51,5 @@ Button::Button(uint8_t pin)
     m_Pin = pin;
 
     pinMode(m_Pin, INPUT);
-    digitalRead(m_Pin);
+    m_State = digitalRead(m_Pin);
 }
