@@ -39,3 +39,9 @@
   Editing client source to test new stuff
   Adding reset button to turn of alarm (testing purposes only)
   Adding beep to keypad presses (we don't want different sound for different keys, because someone could theoretically listen to what keys you press)
+
+[2019-01-03]
+  Edited SonicMotionSensor class to not use callbacks (lesser code in class, more readability)
+  Added SpeakerNB (non-blocking version of Speaker) class. This class derrived from Speaker before, which had a virtual method that was overriden (this was not very good because it added another kB(omg, for one method!!!) to the binary and now they are separate classes)
+  Edited LED class to have more general methods
+  Added sensor failure handling/reporting on client side
