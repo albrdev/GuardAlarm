@@ -1,6 +1,21 @@
 #include "SonicSensor.hpp"
 #include <Arduino.h>
 
+int SonicSensor::GetID(void) const
+{
+    return m_ID;
+}
+
+bool SonicSensor::GetActive(void) const
+{
+    return m_Active;
+}
+
+void SonicSensor::SetActive(const bool value)
+{
+    m_Active = value;
+}
+
 double SonicSensor::GetDistance(void)
 {
     double duration, distance;
@@ -17,11 +32,13 @@ double SonicSensor::GetDistance(void)
     return distance;
 }
 
-SonicSensor::SonicSensor(const uint8_t triggerPin, const uint8_t echoPin)
+SonicSensor::SonicSensor(const int id, const uint8_t triggerPin, const uint8_t echoPin, const bool active)
 {
+    m_ID = id;
+    m_Active = active;
+
     m_TriggerPin = triggerPin;
     m_EchoPin = echoPin;
-
     pinMode(m_TriggerPin, OUTPUT);
     pinMode(m_EchoPin, INPUT);
 }
