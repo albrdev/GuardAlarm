@@ -5,11 +5,12 @@
 #include <string.h> /* size_t, memset(), memcpy(), strlen() */
 
 typedef struct _packet_header packet_header_t;
+typedef struct _packet_sensorstatus packet_sensorstatus_t;
 typedef struct _packet_pincode packet_pincode_t;
 
 enum PacketType
 {
-    PT_ERROR = 0,
+    PT_FAILURE = 0,
     PT_SUCCESS = 1,
     PT_EMERGENCY = 2,
     PT_SENSORSTATUS = 3,
@@ -26,6 +27,7 @@ struct __attribute__((packed)) _packet_sensorstatus
 {
     packet_header_t header;
 
+    uint8_t id;
     uint8_t status;
 };
 
@@ -43,6 +45,7 @@ extern "C"
 #endif
     int packet_verify(struct _packet_header *const pkt, const size_t size, const uint16_t checksum);
     void packet_mkheader(struct _packet_header *const pkt, const size_t size, const uint8_t type);
+    void packet_mksensorstatus(struct _packet_sensorstatus *const pkt, const uint8_t id, const uint8_t status);
     void packet_mkpincode(struct _packet_pincode *const pkt, const uint8_t *const pin, const uint8_t mode);
 #ifdef __cplusplus
 } // extern "C"
