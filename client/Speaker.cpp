@@ -1,11 +1,6 @@
 #include "Speaker.hpp"
 #include <Arduino.h>    /* pinMode(), digitalWrite() */
 
-static int Lerp(int start, int end, float percent)
-{
-    return (start + percent * (end - start));
-}
-
 void Speaker::LerpTone(unsigned int a, unsigned int b, unsigned long int t) const
 {
     unsigned long int elapsedTime = 0UL;
