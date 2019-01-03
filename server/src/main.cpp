@@ -81,20 +81,25 @@ int main(void)
             packet_header_t *pkt = (packet_header_t *)data;
             uint16_t crc = mkcrc16((uint8_t *)pkt + sizeof(pkt->checksum), size - sizeof(pkt->checksum));
 
-            printf("recv(size=%d, crc=%04hX)\n", size, crc);
-            printf("header(chk=%04hX, type=%d)\n", pkt->checksum, pkt->type);
+            printf("recv(size=%d, crc=%04hX)", size, crc);
+            printf(", header(chk=%04hX, type=%d)", pkt->checksum, pkt->type);
             if(!packet_verify(pkt, size, pkt->checksum))
             {
                 Sleep(POLL);
                 continue;
             }
 
+            packet_sensorstatus_t *dts;
             packet_pincode_t *dta;
             switch(pkt->type)
             {
+                case PT_SENSORSTATUS:
+                    dts = (packet_sensorstatus_t *)data;
+                    printf(", data(id=%d, status=%hhd)\n", dts->id, (int8_t)dts->status); fflush(stdout);
+                    break;
                 case PT_PIN:
                     dta = (packet_pincode_t *)data;
-                    printf("data(pin=%s, mode=%c (%hhu))\n", dta->pin, dta->mode, dta->mode);
+                    printf(", data(pin=%s, mode=%c (%hhu))\n", dta->pin, dta->mode, dta->mode);
 
                     std::string providedPassword((const char *)dta->pin);
                     UserEntry* userEntry = NULL;
@@ -110,7 +115,7 @@ int main(void)
                         {
                             type = PT_EMERGENCY;
                             // Call emergency function (this function should not print or alert somehow, just completly quiet, but not in this very test case)
-                            logger.WriteCSV(LogEntry(time(NULL), userEntry->GetID(), "Emergency code entered: Notifying the authorities!"));
+                            logger.WriteCSV(LogEntry(time(NULL), userEntry->GetID(), "Emergency code entered"));
                             //emergencyResponse();
                             // Continue as usual (to not startle the possible attacker(s))
                         }

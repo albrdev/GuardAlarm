@@ -5,17 +5,20 @@
 #include "LED.hpp"
 #include "Button.hpp"
 #include "Speaker.hpp"
-#include "SonicSensor.hpp"
+#include "SpeakerNB.hpp"
+#include "Sensor.hpp"
 #include "SonicMotionSensor.hpp"
 #include "packet.h"
 
 LED ledRed(A0, false);
 LED ledYellow(A1, false);
 LED ledGreen(A2, false);
-Button button(2);
 Button resetButton(4);
-Speaker speaker(3);
-SonicMotionSensor motionSensor(A3, A4, 100.0);
+SpeakerNB speaker(3);
+Sensor outerSensor(101, 2, INPUT, false); // Outer sensor
+SonicMotionSensor motionSensor(102, A3, A4, 50.0, false); // Inner sensor
+unsigned int motionSensorFailurePoint = 0U;
+const unsigned int MOTIONSENSOR_FAILUREDELAY = 1000U;
 
 const byte rows = 4;
 const byte cols = 4;
@@ -30,82 +33,75 @@ char keys[rows][cols] =
 byte rowPins[rows] = { 10, 11, 12, 13 };
 byte colPins[cols] = { 6, 7, 8, 9 };
 Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
-
 const char digits[] = "0123456789";
 const char modes[] = "ABCD";
 
+const int LOGINATTEMPTS_MAX = 3;
 PIN pinCode;
+int loginAttempts = 0;
 
-bool alarmActive = false;
-bool outerSensorsActive = true;
-bool innerSensorsActive = true;
-
-void SoundAlarm(void)
-{
-    speaker.Siren(512, 1024, 5000);
-    ledRed.SetState(true);
-    delay(250);
-    ledRed.SetState(false);
-    delay(250);
-}
-
-void OnMotionDetection(bool hasMotion)
-{
-    if(alarmActive)
-        return;
-
-    if(hasMotion)
-    {
-        if(innerSensorsActive)
-            alarmActive = true; //
-        else
-        {
-            ledRed.SetState(true);
-            delay(100UL);
-        }
-    }
-    else
-    {
-        ledRed.SetState(false);
-    }
-}
+bool alarmTriggered = false;
 
 void ActivateOuterAlarm()
 {
-    outerSensorsActive = true;
+    outerSensor.SetActive(true);
 
-    speaker.Beep(1024, 3000);
-    ledRed.Blink(3, 500);
+    //speaker.Beep(1024, 3000);
 }
 
 void ActivateAlarm()
 {
-    innerSensorsActive = true;
-    outerSensorsActive = true;
+    outerSensor.SetActive(true);
+    motionSensor.SetActive(true);
 
-    speaker.Beep(1024, 3000);
-    ledRed.Blink(3, 500);
+    //speaker.Beep(1024, 3000);
+    tone(3, 1024, 250);
+    delay(250);
+    tone(3, 1024, 250);
+    delay(250);
+    tone(3, 1024, 250);
+    delay(250);
+    tone(3, 1024, 250);
+    delay(250);
+    ledGreen.SetState(true);
 }
 
 void DeactivateAlarm()
 {
-    innerSensorsActive = false;
-    outerSensorsActive = false;
+    outerSensor.SetActive(false);
+    motionSensor.SetActive(false);
 
-    speaker.Beep(1024, 100);
+    tone(3, 1024, 100);
     delay(100);
-    speaker.Beep(1024, 100);
+    tone(3, 1024, 100);
+    delay(100);
     ledGreen.SetState(false);
+}
+
+void TriggerAlarm()
+{
+    alarmTriggered = true;
+
+    ledRed.Blink(250);
+    ledYellow.Blink(250);
+    ledGreen.Blink(250);
 }
 
 char data[256];
 unsigned long int delayTime = 100UL;
 
+void Bla(int count, unsigned int freq, unsigned long dur)
+{
+    int i;
+    for(i = 0; i < count; i++)
+    {
+        tone(freq, freq, dur);
+    }
+}
+
 void setup()
 {
-    button.SetReleaseCallback(SoundAlarm); Serial.begin(9600);
-    motionSensor.SetTriggerCallback(OnMotionDetection);
-    motionSensor.SetFailureCallback(SoundAlarm);
+    Serial.begin(9600);
 
     do
     {
@@ -113,22 +109,16 @@ void setup()
     } while(motionSensor.GetMonitorDistance() == 0.0);
 
     ledGreen.SetState(true);
-
-    //Serial.begin(9600);
 }
 
-void handleKeypad()
+bool keypadAuthentication()
 {
     char key = keypad.getKey();
     if(key != '\0')
     {
         speaker.Beep(768, 100);
 
-        if(strchr(digits, key) != NULL)
-        {
-            pinCode.Append(key);
-        }
-        else if(strchr(modes, key) != NULL)
+        if(strchr(modes, key) != NULL)
         {
             pinCode.Clear();
             pinCode.SetMode(key);
@@ -136,91 +126,159 @@ void handleKeypad()
         else if(key == '*')
         {
             pinCode.Clear();
-            speaker.Beep(1024, 100);
         }
         else if(key == '#')
         {
             if(pinCode.IsValid())
             {
-                packet_pincode_t pp;
-                packet_mkpincode(&pp, (const uint8_t *const)pinCode.GetContent(), pinCode.GetMode());
+                return true;
+            }
 
-                Serial.write((const char *)&pp, sizeof(pp));
+            pinCode.Clear();
+        }
+        else
+        {
+            pinCode.Append(key);
+        }
+
+        //delay(delayTime);
+    }
+
+    return false;
+}
+
+void checkSensors()
+{
+    if(outerSensor.IsTriggered())
+    {
+        TriggerAlarm();
+    }
+
+    MotionSensorState mss = motionSensor.GetState();
+    switch(mss)
+    {
+        case MotionSensorState::MSS_FAILURE:
+            if(!motionSensor.GetActive()) //
+                return;
+
+            if(motionSensorFailurePoint == 0U)
+            {
+                motionSensorFailurePoint = millis() + MOTIONSENSOR_FAILUREDELAY;
+            }
+            else if(millis() >= motionSensorFailurePoint)
+            {
+                packet_sensorstatus_t pss;
+                packet_mksensorstatus(&pss, motionSensor.GetID(), (uint8_t)-1);
+                Serial.write((const char *)&pss, sizeof(pss));
                 Serial.flush();
-                speaker.Beep(1024, 100);
 
-                size_t size = Serial.readBytes(data, sizeof(data));
-                if(size < (int)sizeof(packet_header_t))
+                TriggerAlarm();
+            }
+            break;
+        case MotionSensorState::MSS_TRIGGERED:
+            if(motionSensor.GetActive())
+                TriggerAlarm();
+            else
+                ledRed.SetState(true);
+
+            motionSensorFailurePoint = 0U;
+            break;
+        case MotionSensorState::MSS_IDLE:
+            motionSensorFailurePoint = 0U;
+
+            if(!motionSensor.GetActive())
+                ledRed.SetState(false);
+            break;
+    }
+}
+
+bool sensorFailure = false;
+
+unsigned int fromFreq = 1024;
+unsigned int toFreq = 512;
+
+void loop()
+{
+    if(alarmTriggered)
+    {
+        if(resetButton.GetState())
+        {
+            alarmTriggered = false;
+            loginAttempts = 0;
+
+            return;
+        }
+
+        if(!speaker.Active())
+        {
+            unsigned int tmp = fromFreq;
+            fromFreq = toFreq;
+            toFreq = tmp;
+            speaker.LerpTone(fromFreq, toFreq, 2500U);
+        }
+    }
+    else
+    {
+        checkSensors();
+
+        if(keypadAuthentication())
+        {
+            packet_pincode_t pp;
+            packet_mkpincode(&pp, (const uint8_t *const)pinCode.GetContent(), pinCode.GetMode());
+
+            Serial.write((const char *)&pp, sizeof(pp));
+            Serial.flush();
+            //speaker.Beep(1024, 100);
+
+            size_t size = Serial.readBytes(data, sizeof(data));
+            if(size >= (int)sizeof(packet_header_t))
+            {
+                packet_header_t *pkt = (packet_header_t *)data;
+                if(packet_verify(pkt, size, pkt->checksum))
                 {
-                    if(size != 0)
+                    if(pkt->type == PT_SUCCESS)
                     {
-                        ledYellow.SetState(true);
+                        switch(pinCode.GetMode())
+                        {
+                            case 'A':
+                                ActivateAlarm();
+                                break;
+                            case 'B':
+                                ActivateOuterAlarm();
+                                break;
+                            case 'C':
+                                break;
+                            case 'D':
+                                break;
+                            default:
+                                DeactivateAlarm();
+                        };
                     }
-                }
-                else
-                {
-                    packet_header_t *pkt = (packet_header_t *)data;
-                    if(packet_verify(pkt, size, pkt->checksum))
+                    else if(pkt->type == PT_FAILURE)
                     {
-                        if(pkt->type == PT_SUCCESS)
+                        loginAttempts++;
+                        if(loginAttempts >= LOGINATTEMPTS_MAX)
                         {
-                            DeactivateAlarm();
-                            switch(pinCode.GetMode())
-                            {
-                                case 'A':
-                                    break;
-                                case 'B':
-                                    break;
-                                case 'C':
-                                    break;
-                                case 'D':
-                                    break;
-                                default:
-                            };
+                            TriggerAlarm();
                         }
-                        else if(pkt->type == PT_ERROR)
-                        {
-                            speaker.Beep(256, 250);
-                            ledRed.SetState(true);
-                            delay(250);
-                            ledRed.SetState(false);
-                        }
+
+                        speaker.Beep(256, 500);
+                        ledRed.CountedBlink(1, 500);
                     }
                 }
             }
             else
             {
-                speaker.Beep(256, 100);
+                if(size != 0)
+                    ledYellow.SetState(true);
             }
 
             pinCode.Clear();
         }
-
-        delay(delayTime);
     }
-}
 
-unsigned long bla = 0;
-
-void loop()
-{
-    if(alarmActive)
-    {
-        if(resetButton.GetState())
-        {
-            alarmActive = false;
-            return;
-        }
-
-        SoundAlarm();
-    }
-    else
-    {
-        alarmActive = outerSensorsActive && !digitalRead(2);
-
-        //button.Update();
-        //motionSensor.Update();
-
-        handleKeypad();
-    }
+    speaker.Update();
+    ledRed.Update();
+    ledYellow.Update();
+    ledGreen.Update();
 }
