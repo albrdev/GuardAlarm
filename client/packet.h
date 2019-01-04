@@ -12,9 +12,8 @@ enum PacketType
 {
     PT_FAILURE = 0,
     PT_SUCCESS = 1,
-    PT_EMERGENCY = 2,
-    PT_SENSORSTATUS = 3,
-    PT_PIN = 4,
+    PT_SENSORSTATUS = 2,
+    PT_PIN = 3
 };
 
 struct __attribute__((packed)) _packet_header
