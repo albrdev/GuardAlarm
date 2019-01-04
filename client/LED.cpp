@@ -72,17 +72,20 @@ void LED::Stop(void)
 
 void LED::Update(void)
 {
-    unsigned long int time = millis();
-    if(((m_Mode & BlinkMode::BM_COUNT) != 0 && m_Counter >= m_Count) || ((m_Mode & BlinkMode::BM_TIME) != 0 && time >= m_EndTime))
+    if(!m_Active)
+        return;
+
+    unsigned long int currentTime = millis();
+    if(((m_Mode & BlinkMode::BM_COUNT) != 0 && m_Counter >= m_Count) || ((m_Mode & BlinkMode::BM_TIME) != 0 && currentTime >= m_EndTime))
     {
         Stop();
         return;
     }
 
-    if(time >= m_StateChangePoint)
+    if(currentTime >= m_StateChangePoint)
     {
         _SetState(!m_State);
-        m_StateChangePoint = time + m_Interval;
+        m_StateChangePoint = currentTime + m_Interval;
         m_Counter++;
     }
 }
