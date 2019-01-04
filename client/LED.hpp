@@ -17,11 +17,11 @@ private:
     uint8_t m_Pin;
     bool m_State;
 
-    unsigned int m_MaxCount;
-    unsigned long int m_Duration;
+    unsigned int m_Count;
+    unsigned long int m_Interval;
     unsigned long int m_EndTime;
 
-    unsigned int m_Count;
+    unsigned int m_Counter;
     unsigned long int m_StateChangePoint;
     unsigned long int m_ElapsedTime;
 

@@ -23,7 +23,7 @@ void LED::InitBlink(const bool initialState)
     Stop();
     SetState(initialState);
 
-    m_Count = 0U;
+    m_Counter = 0U;
     m_ElapsedTime = 0U;
     m_StateChangePoint = 0U;
     m_InitialState = m_State;
@@ -33,8 +33,8 @@ void LED::InitBlink(const bool initialState)
 void LED::CountedBlink(const unsigned int count, const unsigned long int blinkDuration, bool initialState)
 {
     m_Mode = BlinkMode::BM_COUNT;
-    m_MaxCount = count >= 0 ? count * 2 : -1;
-    m_Duration = blinkDuration;
+    m_Count = count * 2;
+    m_Interval = blinkDuration;
     InitBlink(initialState);
 }
 
@@ -42,23 +42,23 @@ void LED::TimedBlink(const unsigned long int totalDuration, const unsigned long 
 {
     m_Mode = BlinkMode::BM_TIME;
     m_EndTime = totalDuration;
-    m_Duration = blinkDuration;
+    m_Interval = blinkDuration;
     InitBlink(initialState);
 }
 
 void LED::Blink(const unsigned int count, const unsigned long int totalDuration, const unsigned long int blinkDuration, bool initialState)
 {
     m_Mode = BlinkMode::BM_COUNT | BlinkMode::BM_TIME;
-    m_MaxCount = count * 2;
+    m_Count = count * 2;
     m_EndTime = totalDuration;
-    m_Duration = blinkDuration;
+    m_Interval = blinkDuration;
     InitBlink(initialState);
 }
 
 void LED::Blink(const unsigned long int blinkDuration, bool initialState)
 {
     m_Mode = BlinkMode::BM_NONE;
-    m_Duration = blinkDuration;
+    m_Interval = blinkDuration;
     InitBlink(initialState);
 }
 
@@ -66,14 +66,14 @@ void LED::Stop(void)
 {
     if(!m_Active) return;
 
-    SetState(m_InitialState);
+    _SetState(m_InitialState);
     m_Active = false;
 }
 
 void LED::Update(void)
 {
     unsigned long int time = millis();
-    if((m_Mode & BlinkMode::BM_COUNT && m_Count >= m_MaxCount) || (m_Mode & BlinkMode::BM_TIME && time >= m_EndTime))
+    if(((m_Mode & BlinkMode::BM_COUNT) != 0 && m_Counter >= m_Count) || ((m_Mode & BlinkMode::BM_TIME) != 0 && time >= m_EndTime))
     {
         Stop();
         return;
@@ -81,9 +81,9 @@ void LED::Update(void)
 
     if(time >= m_StateChangePoint)
     {
-        _SetState(!GetState());
-        m_StateChangePoint = time + m_Duration;
-        m_Count++;
+        _SetState(!m_State);
+        m_StateChangePoint = time + m_Interval;
+        m_Counter++;
     }
 }
 
