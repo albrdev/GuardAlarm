@@ -45,3 +45,11 @@
   Added SpeakerNB (non-blocking version of Speaker) class. This class derrived from Speaker before, which had a virtual method that was overriden (this was not very good because it added another kB(omg, for one method!!!) to the binary and now they are separate classes)
   Edited LED class to have more general methods
   Added sensor failure handling/reporting on client side
+
+[2019-01-04]
+  * Keypad stopped responding randomly. There seemes to be an endless loop or something.
+    I put some serial output to se what was going on. Strangely the bug didn't trigger when I put 2 or more Serial.println in Arduino's loop function (and there are no for or while loops I can think of that can cause this)
+    This is the odd type of bugs you'll never want; those bugs who seems very illogical...but there acctually was logic behind it.
+    The only cause for this I could think of was that the serial print look a while to complete and therefore it's a timing problem,
+    and in the LED class I found an accidently recursive function call that called itself if a bool was true (which was set to false after Blink operation was completed).
+    Call that one too fast caused this, and it's now fixed.
