@@ -68,3 +68,5 @@
     The only cause for this I could think of was that the serial print look a while to complete and therefore it's a timing problem,
     and in the LED class I found an accidently recursive function call that called itself if a bool was true (which was set to false after Blink operation was completed).
     Call that one too fast caused this, and it's now fixed.
+  * Making up main part of program, testing and cleaning up / restructure code
+  * Removed reset button and readded it as an additional (outer) sensor (serial circuit with the other one, so we don't have to deal with two separate sensors)
