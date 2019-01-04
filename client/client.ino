@@ -10,13 +10,14 @@
 #include "SonicMotionSensor.hpp"
 #include "packet.h"
 
-LED ledRed(A0, false);
-LED ledYellow(A1, false);
-LED ledGreen(A2, false);
-Button resetButton(4);
+LED redLED(A0, false);
+LED yellowLED(A1, false);
+LED greenLED(A2, false);
 SpeakerNB speaker(3);
-Sensor outerSensor(101, 2, INPUT, false); // Outer sensor
+
+Sensor outerSensor(101, 2, INPUT, true); // Outer sensor
 SonicMotionSensor motionSensor(102, A3, A4, 50.0, false); // Inner sensor
+
 unsigned int motionSensorFailurePoint = 0U;
 const unsigned int MOTIONSENSOR_FAILUREDELAY = 1000U;
 
@@ -46,70 +47,86 @@ void ActivateOuterAlarm()
 {
     outerSensor.SetActive(true);
 
-    //speaker.Beep(1024, 3000);
-}
+    speaker.Beep(1024, 250);
+    delay(500);
+    speaker.Beep(1024, 250);
+    delay(500);
+    
 
-void ActivateAlarm()
-{
-    outerSensor.SetActive(true);
-    motionSensor.SetActive(true);
-
-    //speaker.Beep(1024, 3000);
-    tone(3, 1024, 250);
-    delay(250);
-    tone(3, 1024, 250);
-    delay(250);
-    tone(3, 1024, 250);
-    delay(250);
-    tone(3, 1024, 250);
-    delay(250);
-    ledGreen.SetState(true);
-}
-
-void DeactivateAlarm()
-{
-    outerSensor.SetActive(false);
-    motionSensor.SetActive(false);
-
-    tone(3, 1024, 100);
-    delay(100);
-    tone(3, 1024, 100);
-    delay(100);
-    ledGreen.SetState(false);
-}
-
-void TriggerAlarm()
-{
-    alarmTriggered = true;
-
-    ledRed.Blink(250);
-    ledYellow.Blink(250);
-    ledGreen.Blink(250);
-}
-
-char data[256];
-unsigned long int delayTime = 100UL;
-
-void Bla(int count, unsigned int freq, unsigned long dur)
-{
-    int i;
-    for(i = 0; i < count; i++)
+    if(outerSensor.GetActive())
     {
-        tone(freq, freq, dur);
+        redLED.TimedBlink(3000, 750);
+        unsigned long int t = millis() + 3000;
+        while(millis() < t)
+        {
+            redLED.Update();
+        }
+
+        yellowLED.SetState(true);
     }
 }
 
-void setup()
+void ActivateAlarm(void)
 {
-    Serial.begin(9600);
+    outerSensor.SetActive(true);
 
     do
     {
         motionSensor.SetMonitorDistance();
     } while(motionSensor.GetMonitorDistance() == 0.0);
+    motionSensor.SetActive(true);
 
-    ledGreen.SetState(true);
+    //speaker.Beep(1024, 3000);
+    speaker.Beep(1024, 500);
+    delay(750);
+    speaker.Beep(1024, 500);
+    delay(750);
+    speaker.Beep(1024, 500);
+    delay(750);
+    greenLED.SetState(true);
+
+    if(outerSensor.GetActive() || motionSensor.GetActive())
+    {
+        yellowLED.SetState(true);
+    }
 }
+
+void DeactivateAlarm(void)
+{
+    outerSensor.SetActive(false);
+    motionSensor.SetActive(false);
+
+    speaker.Beep(1024, 250);
+    delay(500);
+    speaker.Beep(1024, 250);
+    delay(500);
+    greenLED.SetState(false);
+}
+
+void TriggerAlarm(void)
+{
+    Serial.println("activate");
+    alarmTriggered = true;
+
+    redLED.Blink(250);
+    yellowLED.Blink(250);
+    greenLED.Blink(250);
+}
+
+void ResetAlarm(void)
+{
+    Serial.println("deactivate");
+    alarmTriggered = false;
+    loginAttempts = 0;
+
+    redLED.Stop();
+    yellowLED.Stop();
+    greenLED.SetState(true);
+    speaker.Stop();
+}
+
+char data[256];
+unsigned long int delayTime = 100UL;
 
 bool keypadAuthentication()
 {
@@ -149,46 +166,43 @@ bool keypadAuthentication()
 
 void checkSensors()
 {
-    if(outerSensor.IsTriggered())
+    if(outerSensor.GetActive() && !outerSensor.GetState())
     {
         TriggerAlarm();
     }
 
-    MotionSensorState mss = motionSensor.GetState();
-    switch(mss)
+    if(motionSensor.GetActive() && motionSensor.GetMonitorDistance() > 0.0)
     {
-        case MotionSensorState::MSS_FAILURE:
-            if(!motionSensor.GetActive()) //
-                return;
 
-            if(motionSensorFailurePoint == 0U)
-            {
-                motionSensorFailurePoint = millis() + MOTIONSENSOR_FAILUREDELAY;
-            }
-            else if(millis() >= motionSensorFailurePoint)
-            {
-                packet_sensorstatus_t pss;
-                packet_mksensorstatus(&pss, motionSensor.GetID(), (uint8_t)-1);
-                Serial.write((const char *)&pss, sizeof(pss));
-                Serial.flush();
+        MotionSensorState mss = motionSensor.GetState();
+        switch(mss)
+        {
+            case MotionSensorState::MSS_FAILURE:
+                if(!motionSensor.GetActive()) //
+                    return;
 
+                if(motionSensorFailurePoint == 0U)
+                {
+                    motionSensorFailurePoint = millis() + MOTIONSENSOR_FAILUREDELAY;
+                }
+                else if(millis() >= motionSensorFailurePoint)
+                {
+                    packet_sensorstatus_t pss;
+                    packet_mksensorstatus(&pss, motionSensor.GetID(), (uint8_t)-1);
+                    Serial.write((const char *)&pss, sizeof(pss));
+                    Serial.flush();
+
+                    TriggerAlarm();
+                }
+                break;
+            case MotionSensorState::MSS_TRIGGERED:
                 TriggerAlarm();
-            }
-            break;
-        case MotionSensorState::MSS_TRIGGERED:
-            if(motionSensor.GetActive())
-                TriggerAlarm();
-            else
-                ledRed.SetState(true);
-
-            motionSensorFailurePoint = 0U;
-            break;
-        case MotionSensorState::MSS_IDLE:
-            motionSensorFailurePoint = 0U;
-
-            if(!motionSensor.GetActive())
-                ledRed.SetState(false);
-            break;
+                motionSensorFailurePoint = 0U;
+                break;
+            case MotionSensorState::MSS_IDLE:
+                motionSensorFailurePoint = 0U;
+                break;
+        }
     }
 }
 
@@ -197,24 +211,21 @@ bool sensorFailure = false;
 unsigned int fromFreq = 1024;
 unsigned int toFreq = 512;
 
+void setup()
+{
+    Serial.begin(9600);
+}
+
 void loop()
 {
     if(alarmTriggered)
     {
-        if(resetButton.GetState())
-        {
-            alarmTriggered = false;
-            loginAttempts = 0;
-
-            return;
-        }
-
         if(!speaker.Active())
         {
             unsigned int tmp = fromFreq;
             fromFreq = toFreq;
             toFreq = tmp;
-            speaker.LerpTone(fromFreq, toFreq, 2500U);
+            speaker.LerpTone(fromFreq, toFreq, 2500);
         }
     }
     else
@@ -228,7 +239,6 @@ void loop()
 
             Serial.write((const char *)&pp, sizeof(pp));
             Serial.flush();
-            //speaker.Beep(1024, 100);
 
             size_t size = Serial.readBytes(data, sizeof(data));
             if(size >= (int)sizeof(packet_header_t))
@@ -238,6 +248,7 @@ void loop()
                 {
                     if(pkt->type == PT_SUCCESS)
                     {
+                        loginAttempts = 0;
                         switch(pinCode.GetMode())
                         {
                             case 'A':
@@ -252,25 +263,26 @@ void loop()
                                 break;
                             default:
                                 DeactivateAlarm();
-                        };
+                        }
                     }
                     else if(pkt->type == PT_FAILURE)
                     {
-                        loginAttempts++;
-                        if(loginAttempts >= LOGINATTEMPTS_MAX)
+                        if(++loginAttempts >= LOGINATTEMPTS_MAX)
                         {
                             TriggerAlarm();
                         }
-
-                        speaker.Beep(256, 500);
-                        ledRed.CountedBlink(1, 500);
+                        else
+                        {
+                            speaker.Beep(256, 250);
+                            redLED.CountedBlink(1, 250);
+                        }
                     }
                 }
             }
             else
             {
                 if(size != 0)
-                    ledYellow.SetState(true);
+                    yellowLED.SetState(true);
             }
 
             pinCode.Clear();
@@ -278,7 +290,7 @@ void loop()
     }
 
     speaker.Update();
-    ledRed.Update();
-    ledYellow.Update();
-    ledGreen.Update();
+    redLED.Update();
+    yellowLED.Update();
+    greenLED.Update();
 }
