@@ -1,7 +1,6 @@
 #include "SonicMotionSensor.hpp"
+#include "math.h"
 #include <Arduino.h>
-
-#define diff(a, b) (abs((a) - (b)))
 
 double SonicMotionSensor::GetMonitorDistance(void)
 {

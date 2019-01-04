@@ -16,8 +16,7 @@ public:
     int GetID(void) const;
     bool GetActive(void) const;
     void SetActive(const bool value);
-    virtual bool GetState(void) const;
-    bool IsTriggered(void) const;
+    bool GetState(void) const;
 
     Sensor(const int id, const uint8_t pin, const uint8_t mode, const bool active = false);
 };

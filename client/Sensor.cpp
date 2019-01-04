@@ -21,11 +21,6 @@ bool Sensor::GetState(void) const
     return digitalRead(m_Pin);
 }
 
-bool Sensor::IsTriggered(void) const
-{
-    return GetActive() && !GetState();
-}
-
 Sensor::Sensor(const int id, const uint8_t pin, const uint8_t mode, const bool active)
 {
     m_ID = id;
