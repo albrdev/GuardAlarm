@@ -1,4 +1,5 @@
 #include "Speaker.hpp"
+#include "math.h"
 #include <Arduino.h>    /* pinMode(), digitalWrite() */
 
 void Speaker::LerpTone(unsigned int a, unsigned int b, unsigned long int t) const
@@ -7,7 +8,7 @@ void Speaker::LerpTone(unsigned int a, unsigned int b, unsigned long int t) cons
     unsigned long prevTime = millis();
     while(elapsedTime < t)
     {
-        unsigned int value = Lerp((int)a, (int)b, (float)elapsedTime / (float)t);
+        unsigned int value = lerp((int)a, (int)b, (float)elapsedTime / (float)t);
         tone(m_Pin, value);
 
         unsigned long int currentTime = millis();

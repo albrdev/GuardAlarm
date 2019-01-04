@@ -10,11 +10,6 @@ protected:
 
     void LerpTone(unsigned int a, unsigned int b, unsigned long int t) const;
 
-    static int Lerp(int start, int end, float percent)
-    {
-        return (start + percent * (end - start));
-    }
-
 public:
     void Beep(const int freq, const unsigned long int duration) const;
     void Siren(const int fromFreq, const unsigned int toFreq, const unsigned long int duration) const;

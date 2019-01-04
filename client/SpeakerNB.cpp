@@ -1,4 +1,5 @@
 #include "SpeakerNB.hpp"
+#include "math.h"
 #include <Arduino.h>    /* pinMode(), digitalWrite() */
 
 bool SpeakerNB::Active(void) const
@@ -24,23 +25,24 @@ void SpeakerNB::Stop(void)
 void SpeakerNB::LerpTone(const unsigned int fromFreq, const unsigned int toFreq, const unsigned long int duration)
 {
     m_Duration = duration;
-    m_FromFreq = fromFreq;
-    m_ToFreq = toFreq;
-    m_ElapsedTime = 0U;
-    m_PrevTime = millis();
+    m_FromFrequency = fromFreq;
+    m_ToFrequency = toFreq;
+    m_StartTime = millis();
+    m_EndTime = m_StartTime + m_Duration;
     m_Active = true;
 }
 
 void SpeakerNB::Update(void)
 {
-    if(m_ElapsedTime < m_Duration)
-    {
-        unsigned int value = Lerp((int)m_FromFreq, (int)m_ToFreq, (float)m_ElapsedTime / (float)m_Duration);
-        tone(m_Pin, value);
+    if(!m_Active)
+        return;
 
-        unsigned long int currentTime = millis();
-        m_ElapsedTime += currentTime - m_PrevTime;
-        m_PrevTime = currentTime;
+    unsigned long int currentTime = millis();
+    if(currentTime < m_EndTime)
+    {
+        double percentage = (double)(currentTime - m_StartTime) / (double)m_Duration;
+        unsigned int value = lerp((int)m_FromFrequency, (int)m_ToFrequency, percentage);
+        tone(m_Pin, value);
     }
     else
     {
