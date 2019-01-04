@@ -1,50 +1,65 @@
 [2018-12-23]
-  Setting up and testing piezo speaker and the alarm triggering button, making classes for them both
+  * Setting up and testing piezo speaker and the alarm triggering button, making classes for them both
 
 [2018-12-24]
-  Testing 4x4 keypad, considered aking my own class to handle it, but then i found there already was one
-  Setting up LEDs, testing with 220Ohm resistor at first, making a LED class, works fine.
-  Tried making a Lerp method for the speaker class so I can lerp through 2 different values under a specific time making it sound like a siren, worked well except when value1 > value2, but recognized it to be a unsigned problem, just changed it to signed ints during the calculation then we cast it back to unsigned when done
+  * Testing 4x4 keypad, considered aking my own class to handle it, but then i found there already was one
+  * Setting up LEDs, testing with 220Ohm resistor at first, making a LED class, works fine.
+  * Tried making a Lerp method for the speaker class so I can lerp through 2 different values under a specific time making it sound like a siren,
+    worked well except when value1 > value2, but recognized it to be a unsigned problem, just changed it to signed ints during the calculation then we cast it back to unsigned when done
 
 [2018-12-25]
-  Managing "old" git repo to handle both server(computer/database etc.) and cient(Arduino) side
-  Made a blink method for LED class
+  * Managing "old" git repo to handle both server(computer/database etc.) and cient(Arduino) side
+  * Made a blink method for LED class
 
 [2018-12-28]
-  Considering and testing out transmission via packets between Arduino and computer. Packets should have a type for the data/action/response and a checksum to verify that the data received is also (most likely) the data sent. We don't want data corruption or sync error to mess with alarm security (maybe this is overkill, but fun nevertheless) (this link addresses some of these problems: https://medium.com/@araffin/simple-and-robust-computer-arduino-serial-communication-f91b95596788).
-  Checksums should be either the first or last bits in the packet for easier calculation.
-  Checksums should not include itself in the calculation.
+  * Considering and testing out transmission via packets between Arduino and computer. Packets should have a type for the data/action/response and a checksum to verify that the data received is also (most likely) the data sent.
+    We don't want data corruption or sync error to mess with alarm security (maybe this is overkill, but fun nevertheless) (this link addresses some of these problems: https://medium.com/@araffin/simple-and-robust-computer-arduino-serial-communication-f91b95596788).
+  
+  * Checksums should be either the first or last bits in the packet for easier calculation.
+  * Checksums should not include itself in the calculation.
 
 [2018-12-29]
-  Writing basics for keypad interaction. I want a string for the pin itself and an additional char for the options A and B. Also, to make it work like an actual pin code keypad we'll need to manage digit "overflow", i.e if I type 1234567, we'll want only 234567 (6 digits is pincode maxlength) to be sent. When a digit is typed, we'll check if max length is already reached, remove the first digit and then just add the new one
-  Implemented basic serial communication using packets with checksums, sending typed in pin code successfully.
-  Made a class for the piezo speaker
-  Made a non-blocking blink method for LED class (still need to call this is the Arduino main loop though)
+  * Writing basics for keypad interaction. I want a string for the pin itself and an additional char for the options A and B. Also, to make it work like an actual pin code keypad we'll need to manage digit "overflow",
+    i.e if I type 1234567, we'll want only 234567 (6 digits is pincode maxlength) to be sent. When a digit is typed, we'll check if max length is already reached, remove the first digit and then just add the new one
+  
+  * Implemented basic serial communication using packets with checksums, sending typed in pin code successfully.
+  * Made a class for the piezo speaker
+  * Made a non-blocking blink method for LED class (still need to call this is the Arduino main loop though)
 
 [2018-12-29]
-  According to https://hackingmajenkoblog.wordpress.com/2016/02/04/the-evils-of-arduino-strings/, the Arduino String class is a bad choice due to dynamic memory allocation. So I created a PIN class that has a static size of 6 + 1 bytes allocated for the PIN code
-  Code refactoring
+  * According to https://hackingmajenkoblog.wordpress.com/2016/02/04/the-evils-of-arduino-strings/, the Arduino String class is a bad choice due to dynamic memory allocation.
+    So I've created a PIN class that has a static size of 6 + 1 bytes allocated for the PIN code
+
+  * Code refactoring
 
 [2018-12-30]
-  Added SerialPort class into the project, modified/cleaned it up a bit.
-  Changed all C++ header file extensions from 'h' to 'hpp'
-  Put packet management in its own source file and added include dir in Makefile to take this file into account (It's a shared header between client/server code, they both need it)
-  Tested transmissions between client/server, both ways seems to work fine except rarely theres what I think is an sync problem (CRC checksum failed, and got some scrambled data) (only happened in the first pin code transmission so far, not very often)
-  Also I need to fix output on the server side (some stdout and stderr screws up, and wont prints until I terminate the program using CTRL+C, which is odd considering that I removed buffered output for stderr and tried to flush stdout)
+  * Added SerialPort class into the project, modified/cleaned it up a bit.
+  * Changed all C++ header file extensions from 'h' to 'hpp'
+  * Put packet management in its own source file and added include dir in Makefile to take this file into account (It's a shared header between client/server code, they both need it)
+  * Tested transmissions between client/server, both ways seems to work fine except rarely theres what I think is an sync problem (CRC checksum failed, and got some scrambled data) (only happened in the first pin code transmission so far, not very often)
+  * Also I need to fix output on the server side (some stdout and stderr screws up, and wont prints until I terminate the program using CTRL+C, which is odd considering that I removed buffered output for stderr and tried to flush stdout)
 
 [2019-01-02]
-  Made a sonic sensor and a derrived motion sensor class to detect motions. It can automatically set a monitoring distance at startup and continiously checking if the distance has changed (you could set a difference threshold to which it will detect any change, let's say we are monitoring at a distance of x meters and we have a threshold of 0.2m, the motion detector will trigger on x ± 0.2m)
-  Motion detector could also fail. Sometimes it will give back random weird values (maybe due to the signal bouncing of several object with different distances (plain wall or surface worked better)), this could be fixed by setting timeout in pulseIn function and it would return 0 instead, but 0 is also returned when power circuit has been broken, so to handle that i've been measuring how long only zeroes has been returned, if too long there's a sensor failure
-  Changing outer sensor circuit linking to be always HIGH, then LOW when triggered (button is pressed) (https://www.arduino.cc/en/tutorial/button)
-  Editing client source to test new stuff
-  Adding reset button to turn of alarm (testing purposes only)
-  Adding beep to keypad presses (we don't want different sound for different keys, because someone could theoretically listen to what keys you press)
+  * Made a sonic sensor and a derrived motion sensor class to detect motions.
+    It can automatically set a monitoring distance at startup and continiously checking if the distance has changed (you could set a difference threshold to which it will detect any change,
+    let's say we are monitoring at a distance of x meters and we have a threshold of 0.2m, the motion detector will trigger on x ± 0.2m)
+
+  * Motion detector could also fail. Sometimes it will give back random weird values (maybe due to the signal bouncing of several object with different distances (plain wall or surface worked better)),
+    this could be fixed by setting timeout in pulseIn function and it would return 0 instead, but 0 is also returned when power circuit has been broken,
+    so to handle that i've been measuring how long only zeroes has been returned, if too long there's a sensor failure
+
+  * Changing outer sensor circuit linking to be always HIGH, then LOW when triggered (button is pressed) (https://www.arduino.cc/en/tutorial/button)
+  * Editing client source to test new stuff
+  * Adding reset button to turn of alarm (testing purposes only)
+  * Adding beep to keypad presses (we don't want different sound for different keys, because someone could theoretically listen to what keys you press)
 
 [2019-01-03]
-  Edited SonicMotionSensor class to not use callbacks (lesser code in class, more readability)
-  Added SpeakerNB (non-blocking version of Speaker) class. This class derrived from Speaker before, which had a virtual method that was overriden (this was not very good because it added another kB(omg, for one method!!!) to the binary and now they are separate classes)
-  Edited LED class to have more general methods
-  Added sensor failure handling/reporting on client side
+  * Edited SonicMotionSensor class to not use callbacks (lesser code in class, more readability)
+  * Added SpeakerNB (non-blocking version of Speaker) class. This class derrived from Speaker before,
+    which had a virtual method that was overriden (this was not very good because it added another kB(omg, for one method!!!) to the binary and now they are separate classes)
+  
+  * Edited LED class to have more general methods
+  * Added sensor failure handling/reporting on client side
 
 [2019-01-04]
   * Keypad stopped responding randomly. There seemes to be an endless loop or something.
