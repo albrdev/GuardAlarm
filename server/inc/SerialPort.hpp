@@ -1,7 +1,7 @@
 #ifndef _SERIALPORT_HPP_
 #define _SERIALPORT_HPP_
 
-#define MAX_DATA_LENGTH 256
+#define DATA_MAXSIZE 256
 
 #include <cstdlib>
 #include <cstdint>
