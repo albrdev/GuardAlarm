@@ -10,9 +10,9 @@ class UserTable;
 
 enum UserStatus
 {
-    Active = 1,
-    Inactive = 2,
-    Blocked = 3
+    US_ACTIVE = 1,
+    US_INACTIVE = 2,
+    US_BLOCKED = 3
 };
 
 class UserEntry : public Entry
@@ -35,7 +35,7 @@ protected:
     std::string m_Password = "";
     std::string m_Username = "";
     int m_TagID = -1;
-    UserStatus m_Status = UserStatus::Inactive;
+    UserStatus m_Status = UserStatus::US_INACTIVE;
 
     static int GetNextID(void);
 
@@ -63,8 +63,8 @@ public:
     virtual std::string ToString(void) const override;
 
     // Constructors
-    UserEntry(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status = UserStatus::Active); // Variable 'active' har a defualt value of 'true', if not specified explicitly
-    UserEntry(const int id, const std::string& password, const std::string& username, UserStatus status = UserStatus::Active);
+    UserEntry(const int id, const std::string& password, const std::string& username, const int tagID, UserStatus status = UserStatus::US_ACTIVE); // Variable 'active' har a defualt value of 'true', if not specified explicitly
+    UserEntry(const int id, const std::string& password, const std::string& username, UserStatus status = UserStatus::US_ACTIVE);
     UserEntry(const std::string& password, const std::string& username, const int tagID, UserStatus status);
     UserEntry(const std::string& password, const std::string& username, UserStatus status);
     UserEntry(void);

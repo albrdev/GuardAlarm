@@ -13,9 +13,9 @@
 */
 enum AuthStatus
 {
-    Fail = 0,       // 00000000
-    Success = 1,    // 00000001
-    Emergency = 2   // 00000010
+    AS_FAILURE = 0,     // 00000000
+    AS_SUCCESS = 1,     // 00000001
+    AS_EMERGENCY = 2    // 00000010
     // Possibly more enum constants here must have the value of double the last one, because they're bitflags
 };
 

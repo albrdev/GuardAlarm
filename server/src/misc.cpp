@@ -9,14 +9,14 @@ int userLogin(const std::string& providedPassword, UserTable& usertable, UserEnt
     // Check emergency password first, if by some reason, someone else has someones emergency password as a regular password, we avoid possible security bug by always prioritize emergency password
     if((result = usertable.FindBySecondaryPassword(providedPassword)) != NULL)
     {
-        return AuthStatus::Success | AuthStatus::Emergency;
+        return AuthStatus::AS_SUCCESS | AuthStatus::AS_EMERGENCY;
     }
     else if((result = usertable.FindByPassword(providedPassword)) != NULL) // Now we'll check regular password, when we know nobody had this password as an emergency
     {
-        return AuthStatus::Success;
+        return AuthStatus::AS_SUCCESS;
     }
 
-    return AuthStatus::Fail;
+    return AuthStatus::AS_FAILURE;
 }
 
 /*
