@@ -9,6 +9,7 @@
 #include "Sensor.hpp"
 #include "SonicMotionSensor.hpp"
 #include "packet.h"
+#include "shared.h"
 
 LED redLED(A0, false);
 LED yellowLED(A1, false);
@@ -37,15 +38,68 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 const char digits[] = "0123456789";
 const char modes[] = "ABCD";
 
-const int LOGINATTEMPTS_MAX = 3;
+char data[256];
+unsigned long int delayTime = 100UL;
+
+unsigned int loginAttempts = 0;
 PIN pinCode;
-int loginAttempts = 0;
 
 bool alarmTriggered = false;
+unsigned int sirenStartFreq = 1024;
+unsigned int sirenEndFreq = 512;
 
-void ActivateOuterAlarm()
+void SendSensorStatus(const SensorStatus value)
+{
+    packet_sensorstatus_t pss;
+    packet_mksensorstatus(&pss, outerSensor.GetID(), value);
+    Serial.write((const char *)&pss, sizeof(pss));
+    Serial.flush();
+    delay(delayTime);
+}
+
+void SendPINCode(const char *const value)
+{
+    packet_pincode_t pp;
+    packet_mkpincode(&pp, (const uint8_t *const)value, pinCode.GetMode());
+    Serial.write((const char *)&pp, sizeof(pp));
+    Serial.flush();
+    delay(delayTime);
+}
+
+void ActivateOuterSensor(void)
 {
     outerSensor.SetActive(true);
+    SendSensorStatus(SensorStatus::SS_CLOSED);
+}
+
+void ActivateInnerSensor(void)
+{
+    unsigned long int endTime = millis() + 5000;
+    do
+    {
+        if(millis() >= endTime)
+        {
+            packet_sensorstatus_t pss;
+            packet_mksensorstatus(&pss, motionSensor.GetID(), SensorStatus::SS_FAILURE);
+            Serial.write((const char *)&pss, sizeof(pss));
+            Serial.flush();
+            return;
+        }
+
+        motionSensor.SetMonitorDistance();
+
+    } while(motionSensor.GetMonitorDistance() == 0.0);
+    motionSensor.SetActive(true);
+
+    packet_sensorstatus_t pss;
+    packet_mksensorstatus(&pss, motionSensor.GetID(), SensorStatus::SS_CLOSED);
+    Serial.write((const char *)&pss, sizeof(pss));
+    Serial.flush();
+}
+
+void ActivateOuterAlarm(void)
+{
+    ActivateOuterSensor();
 
     speaker.Beep(1024, 250);
     delay(500);
@@ -68,13 +122,8 @@ void ActivateOuterAlarm()
 
 void ActivateAlarm(void)
 {
-    outerSensor.SetActive(true);
-
-    do
-    {
-        motionSensor.SetMonitorDistance();
-    } while(motionSensor.GetMonitorDistance() == 0.0);
-    motionSensor.SetActive(true);
+    ActivateOuterSensor();
+    ActivateInnerSensor();
 
     //speaker.Beep(1024, 3000);
     speaker.Beep(1024, 500);
@@ -105,7 +154,6 @@ void DeactivateAlarm(void)
 
 void TriggerAlarm(void)
 {
-    Serial.println("activate");
     alarmTriggered = true;
 
     redLED.Blink(250);
@@ -115,7 +163,6 @@ void TriggerAlarm(void)
 
 void ResetAlarm(void)
 {
-    Serial.println("deactivate");
     alarmTriggered = false;
     loginAttempts = 0;
 
@@ -124,9 +171,6 @@ void ResetAlarm(void)
     greenLED.SetState(true);
     speaker.Stop();
 }
-
-char data[256];
-unsigned long int delayTime = 100UL;
 
 bool keypadAuthentication()
 {
@@ -173,12 +217,11 @@ void checkSensors()
 
     if(motionSensor.GetActive() && motionSensor.GetMonitorDistance() > 0.0)
     {
-
         MotionSensorState mss = motionSensor.GetState();
         switch(mss)
         {
             case MotionSensorState::MSS_FAILURE:
-                if(!motionSensor.GetActive()) //
+                if(!motionSensor.GetActive() || alarmTriggered) //
                     return;
 
                 if(motionSensorFailurePoint == 0U)
@@ -187,15 +230,12 @@ void checkSensors()
                 }
                 else if(millis() >= motionSensorFailurePoint)
                 {
-                    packet_sensorstatus_t pss;
-                    packet_mksensorstatus(&pss, motionSensor.GetID(), (uint8_t)-1);
-                    Serial.write((const char *)&pss, sizeof(pss));
-                    Serial.flush();
-
+                    SendSensorStatus(SensorStatus::SS_FAILURE);
                     TriggerAlarm();
                 }
                 break;
             case MotionSensorState::MSS_TRIGGERED:
+                SendSensorStatus(SensorStatus::SS_OPEN);
                 TriggerAlarm();
                 motionSensorFailurePoint = 0U;
                 break;
@@ -205,11 +245,6 @@ void checkSensors()
         }
     }
 }
-
-bool sensorFailure = false;
-
-unsigned int fromFreq = 1024;
-unsigned int toFreq = 512;
 
 void setup()
 {
@@ -222,10 +257,10 @@ void loop()
     {
         if(!speaker.Active())
         {
-            unsigned int tmp = fromFreq;
-            fromFreq = toFreq;
-            toFreq = tmp;
-            speaker.LerpTone(fromFreq, toFreq, 2500);
+            unsigned int tmp = sirenStartFreq;
+            sirenStartFreq = sirenEndFreq;
+            sirenEndFreq = tmp;
+            speaker.LerpTone(sirenStartFreq, sirenEndFreq, 2500);
         }
     }
     else
@@ -234,11 +269,7 @@ void loop()
 
         if(keypadAuthentication())
         {
-            packet_pincode_t pp;
-            packet_mkpincode(&pp, (const uint8_t *const)pinCode.GetContent(), pinCode.GetMode());
-
-            Serial.write((const char *)&pp, sizeof(pp));
-            Serial.flush();
+            SendPINCode(pinCode.GetContent());
 
             size_t size = Serial.readBytes(data, sizeof(data));
             if(size >= (int)sizeof(packet_header_t))
