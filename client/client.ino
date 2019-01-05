@@ -16,7 +16,7 @@ LED yellowLED(A1, false);
 LED greenLED(A2, false);
 SpeakerNB speaker(3);
 
-Sensor outerSensor(101, 2, INPUT, true); // Outer sensor
+Sensor outerSensor(101, 2, INPUT, false); // Outer sensor
 SonicMotionSensor motionSensor(102, A3, A4, 50.0, false); // Inner sensor
 
 const unsigned long int MS_SETDISTANCE_MAXDELAY = 5000UL;
