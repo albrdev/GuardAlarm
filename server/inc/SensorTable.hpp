@@ -8,6 +8,7 @@
 #include "Table.hpp"
 #include "SensorEntry.hpp"
 #include "RegexAssembly.hpp"
+#include "shared.h"
 
 class SensorTable : public Table<SensorEntry>
 {

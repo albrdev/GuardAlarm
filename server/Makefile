@@ -69,7 +69,7 @@ $(DIR_OBJ)/Logger.o: $(DIR_SRC)/Logger.cpp $(DIR_INC)/Logger.hpp
 	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
 $(DIR_OBJ)/SensorTable.o: $(DIR_SRC)/SensorTable.cpp $(DIR_INC)/SensorTable.hpp
-	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
+	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -I$(DIR_CLI) -c $< -o $@
 
 $(DIR_OBJ)/LogTable.o: $(DIR_SRC)/LogTable.cpp $(DIR_INC)/LogTable.hpp
 	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
