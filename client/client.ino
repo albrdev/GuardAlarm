@@ -19,8 +19,9 @@ SpeakerNB speaker(3);
 Sensor outerSensor(101, 2, INPUT, true); // Outer sensor
 SonicMotionSensor motionSensor(102, A3, A4, 50.0, false); // Inner sensor
 
-unsigned int motionSensorFailurePoint = 0U;
-const unsigned int MOTIONSENSOR_FAILUREDELAY = 1000U;
+const unsigned long int MS_SETDISTANCE_MAXDELAY = 5000UL;
+const unsigned long int MS_FAILUREDELAY = 1000UL;
+unsigned long int motionSensorFailurePoint = 0UL;
 
 const byte rows = 4;
 const byte cols = 4;
@@ -41,17 +42,27 @@ const char modes[] = "ABCD";
 char data[256];
 unsigned long int delayTime = 100UL;
 
-unsigned int loginAttempts = 0;
+unsigned int loginAttempts = 0U;
 PIN pinCode;
 
+const unsigned long AUTH_TIMEOUT = (1UL * 60UL) * 1000UL;
+unsigned long int authTimeout = 0UL;
+bool isAuthenticated = false;
 bool alarmTriggered = false;
-unsigned int sirenStartFreq = 1024;
-unsigned int sirenEndFreq = 512;
+unsigned int sirenStartFreq = 1024U;
+unsigned int sirenEndFreq = 512U;
 
-void SendSensorStatus(const SensorStatus value)
+void resetLEDs(void)
+{
+    redLED.SetState(false);
+    yellowLED.SetState(false);
+    greenLED.SetState(false);
+}
+
+void SendSensorStatus(const signed char id, const SensorStatus value)
 {
     packet_sensorstatus_t pss;
-    packet_mksensorstatus(&pss, outerSensor.GetID(), value);
+    packet_mksensorstatus(&pss, id, value);
     Serial.write((const char *)&pss, sizeof(pss));
     Serial.flush();
     delay(delayTime);
@@ -69,12 +80,12 @@ void SendPINCode(const char *const value)
 void ActivateOuterSensor(void)
 {
     outerSensor.SetActive(true);
-    SendSensorStatus(SensorStatus::SS_CLOSED);
+    SendSensorStatus(outerSensor.GetID(), SensorStatus::SS_CLOSED);
 }
 
 void ActivateInnerSensor(void)
 {
-    unsigned long int endTime = millis() + 5000;
+    unsigned long int endTime = millis() + MS_SETDISTANCE_MAXDELAY;
     do
     {
         if(millis() >= endTime)
@@ -99,22 +110,28 @@ void ActivateInnerSensor(void)
 
 void ActivateOuterAlarm(void)
 {
+    if(!isAuthenticated)
+        return;
+
+    isAuthenticated = false;
+    authTimeout = 0;
+
     ActivateOuterSensor();
 
+    resetLEDs();
     speaker.Beep(1024, 250);
     delay(500);
     speaker.Beep(1024, 250);
     delay(500);
-    
 
     if(outerSensor.GetActive())
     {
-        redLED.TimedBlink(3000, 750);
+        /*redLED.TimedBlink(3000, 750);
         unsigned long int t = millis() + 3000;
         while(millis() < t)
         {
             redLED.Update();
-        }
+        }*/
 
         yellowLED.SetState(true);
     }
@@ -122,10 +139,16 @@ void ActivateOuterAlarm(void)
 
 void ActivateAlarm(void)
 {
+    if(!isAuthenticated)
+        return;
+
+    isAuthenticated = false;
+    authTimeout = 0;
+
     ActivateOuterSensor();
     ActivateInnerSensor();
 
-    //speaker.Beep(1024, 3000);
+    resetLEDs();
     speaker.Beep(1024, 500);
     delay(750);
     speaker.Beep(1024, 500);
@@ -142,9 +165,16 @@ void ActivateAlarm(void)
 
 void DeactivateAlarm(void)
 {
+    if(isAuthenticated)
+        return;
+
+    isAuthenticated = true;
+    authTimeout = millis() + AUTH_TIMEOUT;
+
     outerSensor.SetActive(false);
     motionSensor.SetActive(false);
 
+    resetLEDs();
     speaker.Beep(1024, 250);
     delay(500);
     speaker.Beep(1024, 250);
@@ -154,6 +184,9 @@ void DeactivateAlarm(void)
 
 void TriggerAlarm(void)
 {
+    isAuthenticated = false;
+    authTimeout = 0;
+
     alarmTriggered = true;
 
     redLED.Blink(250);
@@ -168,7 +201,7 @@ void ResetAlarm(void)
 
     redLED.Stop();
     yellowLED.Stop();
-    greenLED.SetState(true);
+    greenLED.Stop();
     speaker.Stop();
 }
 
@@ -191,9 +224,7 @@ bool keypadAuthentication()
         else if(key == '#')
         {
             if(pinCode.IsValid())
-            {
                 return true;
-            }
 
             pinCode.Clear();
         }
@@ -212,6 +243,7 @@ void checkSensors()
 {
     if(outerSensor.GetActive() && !outerSensor.GetState())
     {
+        SendSensorStatus(outerSensor.GetID(), SensorStatus::SS_OPEN);
         TriggerAlarm();
     }
 
@@ -226,16 +258,16 @@ void checkSensors()
 
                 if(motionSensorFailurePoint == 0U)
                 {
-                    motionSensorFailurePoint = millis() + MOTIONSENSOR_FAILUREDELAY;
+                    motionSensorFailurePoint = millis() + MS_FAILUREDELAY;
                 }
                 else if(millis() >= motionSensorFailurePoint)
                 {
-                    SendSensorStatus(SensorStatus::SS_FAILURE);
+                    SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_FAILURE);
                     TriggerAlarm();
                 }
                 break;
             case MotionSensorState::MSS_TRIGGERED:
-                SendSensorStatus(SensorStatus::SS_OPEN);
+                SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_OPEN);
                 TriggerAlarm();
                 motionSensorFailurePoint = 0U;
                 break;
@@ -253,6 +285,11 @@ void setup()
 
 void loop()
 {
+    if(authTimeout > 0 && millis() > authTimeout)
+    {
+        isAuthenticated = false;
+    }
+
     if(alarmTriggered)
     {
         if(!speaker.Active())
@@ -269,13 +306,15 @@ void loop()
 
         if(keypadAuthentication())
         {
+            // Send PIN code to server
             SendPINCode(pinCode.GetContent());
 
+            // Receive response
             size_t size = Serial.readBytes(data, sizeof(data));
             if(size >= (int)sizeof(packet_header_t))
             {
                 packet_header_t *pkt = (packet_header_t *)data;
-                if(packet_verify(pkt, size, pkt->checksum))
+                if(packet_verify(pkt, size, pkt->checksum)) // Verify packet itegrity
                 {
                     if(pkt->type == PT_SUCCESS)
                     {
@@ -309,11 +348,6 @@ void loop()
                         }
                     }
                 }
-            }
-            else
-            {
-                if(size != 0)
-                    yellowLED.SetState(true);
             }
 
             pinCode.Clear();
