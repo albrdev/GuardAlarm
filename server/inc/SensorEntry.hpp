@@ -7,13 +7,7 @@
 #include "Generic.hpp"
 #include "Entry.hpp"
 #include "RegexAssembly.hpp"
-
-enum SensorStatus
-{
-    Open = 1,
-    Closed = 0,
-    Failure = -1
-};
+#include "shared.h"
 
 class SensorEntry : public Entry
 {
@@ -27,7 +21,7 @@ private:
 protected:
     static const RegexAssembly c_StatusRegex;
 
-    SensorStatus m_Status = SensorStatus::Closed;
+    SensorStatus m_Status = SensorStatus::SS_CLOSED;
 
     static int GetNextID(void);
 

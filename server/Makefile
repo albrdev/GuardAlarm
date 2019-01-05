@@ -81,7 +81,7 @@ $(DIR_OBJ)/Table.o: $(DIR_SRC)/Table.cpp $(DIR_INC)/Table.hpp
 	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
 
 $(DIR_OBJ)/SensorEntry.o: $(DIR_SRC)/SensorEntry.cpp $(DIR_INC)/SensorEntry.hpp
-	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
+	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -I$(DIR_CLI) -c $< -o $@
 
 $(DIR_OBJ)/LogEntry.o: $(DIR_SRC)/LogEntry.cpp $(DIR_INC)/LogEntry.hpp
 	$(CC_CPP) $(CC_FLAGS) -I$(DIR_INC) -c $< -o $@
