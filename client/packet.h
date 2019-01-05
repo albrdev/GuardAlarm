@@ -26,7 +26,7 @@ struct __attribute__((packed)) _packet_sensorstatus
 {
     packet_header_t header;
 
-    uint8_t id;
+    signed char id;
     signed char status;
 };
 
@@ -44,7 +44,7 @@ extern "C"
 #endif
     int packet_verify(const struct _packet_header *const pkt, const size_t size, const uint16_t checksum);
     void packet_mkheader(struct _packet_header *const pkt, const size_t size, const uint8_t type);
-    void packet_mksensorstatus(struct _packet_sensorstatus *const pkt, const uint8_t id, const signed char status);
+    void packet_mksensorstatus(struct _packet_sensorstatus *const pkt, const signed char id, const signed char status);
     void packet_mkpincode(struct _packet_pincode *const pkt, const uint8_t *const pin, const uint8_t mode);
 #ifdef __cplusplus
 } // extern "C"

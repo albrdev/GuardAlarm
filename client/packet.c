@@ -21,7 +21,7 @@ void packet_mkheader(struct _packet_header *const pkt, const size_t size, const 
     pkt->checksum = mkcrc16((uint8_t *)pkt + sizeof(pkt->checksum), size - sizeof(pkt->checksum));
 }
 
-void packet_mksensorstatus(struct _packet_sensorstatus *const pkt, const uint8_t id, const signed char status)
+void packet_mksensorstatus(struct _packet_sensorstatus *const pkt, const signed char id, const signed char status)
 {
     pkt->id = id;
     pkt->status = status;
