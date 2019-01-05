@@ -52,6 +52,28 @@ bool SensorTable::ParseCSV(const std::string& value, SensorEntry& result)
     return true;
 }
 
+bool SensorTable::Save(const std::string& filePath, const SensorTable& content)
+{
+    std::ofstream stream(filePath, std::ios_base::trunc);
+    if(!stream.is_open())
+    {
+        return false;
+    }
+
+    for(size_t i = 0U; i < content.Count(); i++)
+    {
+        stream << content[i].ToCSVString() << std::endl;
+        if(stream.bad())
+        {
+            stream.close();
+            return false;
+        }
+    }
+
+    stream.close();
+    return true;
+}
+
 bool SensorTable::Load(const std::string& filePath, SensorTable& result)
 {
     std::fstream stream(filePath, std::ifstream::in);

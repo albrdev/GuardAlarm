@@ -20,6 +20,7 @@ public:
     bool FindByID(const int id, SensorEntry& result);
     SensorEntry* FindByID(const int id);
 
+    static bool Save(const std::string& filePath, const SensorTable& content);
     static bool Load(const std::string& filePath, SensorTable& result);
 
     // Constructors
