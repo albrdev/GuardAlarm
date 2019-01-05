@@ -156,7 +156,7 @@ int main(void)
             Sleep(1000);
         }
 
-        fprintf(stderr, "*** Connection successfully established on serial port \'%s\'\n", portName);
+        fprintf(stderr, "*** Connection successfully established on serial port \'%s\'\n\n", portName);
         Sleep(1000);
 
         while(serialPort.IsConnected())
