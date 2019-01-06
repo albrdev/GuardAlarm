@@ -8,8 +8,6 @@
 #include <Arduino.h>
 #endif
 
-#define floor1000(x) ((x) / 1000 * 1000)
-#define ceil1000(x) (((x) + 500) / 1000 * 1000)
 #define diff(a, b) (abs((a) - (b)))
 
 #ifdef __cplusplus
