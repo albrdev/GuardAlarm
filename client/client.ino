@@ -39,8 +39,13 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 const char digits[] = "0123456789";
 const char modes[] = "ABCD";
 
+const unsigned int VALUE_LOW = 250U;
+const unsigned int VALUE_MEDIUM = 500U;
+const unsigned int VALUE_HIGH = 750U;
+const unsigned int VALUE_HIGHEST = 1000U;
+
+const unsigned long int POLL_DELAY = 100UL;
 char data[256];
-unsigned long int delayTime = 100UL;
 
 unsigned int loginAttempts = 0U;
 PIN pinCode;
@@ -49,8 +54,8 @@ const unsigned long AUTH_TIMEOUT = (1UL * 60UL) * 1000UL;
 unsigned long int authTimeout = 0UL;
 bool isAuthenticated = false;
 bool alarmTriggered = false;
-unsigned int sirenStartFreq = 1024U;
-unsigned int sirenEndFreq = 512U;
+unsigned int sirenStartFreq = VALUE_HIGHEST;
+unsigned int sirenEndFreq = VALUE_MEDIUM;
 
 void resetLEDs(void)
 {
@@ -65,7 +70,7 @@ void SendSensorStatus(const signed char id, const SensorStatus value)
     packet_mksensorstatus(&pss, id, value);
     Serial.write((const char *)&pss, sizeof(pss));
     Serial.flush();
-    delay(delayTime);
+    delay(POLL_DELAY);
 }
 
 void SendPINCode(const char *const value)
@@ -74,7 +79,7 @@ void SendPINCode(const char *const value)
     packet_mkpincode(&pp, (const uint8_t *const)value, pinCode.GetMode());
     Serial.write((const char *)&pp, sizeof(pp));
     Serial.flush();
-    delay(delayTime);
+    delay(POLL_DELAY);
 }
 
 void ActivateOuterSensor(void)
@@ -90,10 +95,7 @@ void ActivateInnerSensor(void)
     {
         if(millis() >= endTime)
         {
-            packet_sensorstatus_t pss;
-            packet_mksensorstatus(&pss, motionSensor.GetID(), SensorStatus::SS_FAILURE);
-            Serial.write((const char *)&pss, sizeof(pss));
-            Serial.flush();
+            SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_FAILURE);
             return;
         }
 
@@ -102,10 +104,7 @@ void ActivateInnerSensor(void)
     } while(motionSensor.GetMonitorDistance() == 0.0);
     motionSensor.SetActive(true);
 
-    packet_sensorstatus_t pss;
-    packet_mksensorstatus(&pss, motionSensor.GetID(), SensorStatus::SS_CLOSED);
-    Serial.write((const char *)&pss, sizeof(pss));
-    Serial.flush();
+    SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_CLOSED);
 }
 
 void ActivateOuterAlarm(void)
@@ -119,21 +118,23 @@ void ActivateOuterAlarm(void)
     ActivateOuterSensor();
 
     resetLEDs();
-    speaker.Beep(1024, 250);
+    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
     delay(500);
-    speaker.Beep(1024, 250);
+    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
     delay(500);
 
     if(outerSensor.GetActive())
     {
-        /*redLED.TimedBlink(3000, 750);
+        speaker.Beep(VALUE_MEDIUM, 3000);
+        redLED.TimedBlink(3000, VALUE_HIGH);
         unsigned long int t = millis() + 3000;
         while(millis() < t)
         {
             redLED.Update();
-        }*/
+        }
 
         yellowLED.SetState(true);
+        greenLED.Blink(VALUE_HIGH);
     }
 }
 
@@ -149,11 +150,11 @@ void ActivateAlarm(void)
     ActivateInnerSensor();
 
     resetLEDs();
-    speaker.Beep(1024, 500);
+    speaker.Beep(VALUE_HIGHEST, VALUE_MEDIUM);
     delay(750);
-    speaker.Beep(1024, 500);
+    speaker.Beep(VALUE_HIGHEST, VALUE_MEDIUM);
     delay(750);
-    speaker.Beep(1024, 500);
+    speaker.Beep(VALUE_HIGHEST, VALUE_MEDIUM);
     delay(750);
     greenLED.SetState(true);
 
@@ -174,11 +175,12 @@ void DeactivateAlarm(void)
     outerSensor.SetActive(false);
     motionSensor.SetActive(false);
 
+    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
+    delay(500);
+    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
+    delay(500);
+
     resetLEDs();
-    speaker.Beep(1024, 250);
-    delay(500);
-    speaker.Beep(1024, 250);
-    delay(500);
     greenLED.SetState(false);
 }
 
@@ -189,9 +191,9 @@ void TriggerAlarm(void)
 
     alarmTriggered = true;
 
-    redLED.Blink(250);
-    yellowLED.Blink(250);
-    greenLED.Blink(250);
+    redLED.Blink(VALUE_LOW);
+    yellowLED.Blink(VALUE_LOW);
+    greenLED.Blink(VALUE_LOW);
 }
 
 void ResetAlarm(void)
@@ -203,6 +205,9 @@ void ResetAlarm(void)
     yellowLED.Stop();
     greenLED.Stop();
     speaker.Stop();
+
+    sirenStartFreq = VALUE_HIGHEST;
+    sirenEndFreq = VALUE_MEDIUM;
 }
 
 bool keypadAuthentication()
@@ -210,7 +215,7 @@ bool keypadAuthentication()
     char key = keypad.getKey();
     if(key != '\0')
     {
-        speaker.Beep(768, 100);
+        speaker.Beep(VALUE_HIGH, 100);
 
         if(strchr(modes, key) != NULL)
         {
@@ -232,8 +237,6 @@ bool keypadAuthentication()
         {
             pinCode.Append(key);
         }
-
-        //delay(delayTime);
     }
 
     return false;
@@ -343,11 +346,13 @@ void loop()
                         }
                         else
                         {
-                            speaker.Beep(256, 250);
-                            redLED.CountedBlink(1, 250);
+                            speaker.Beep(VALUE_LOW, VALUE_LOW);
+                            redLED.CountedBlink(1, VALUE_LOW);
                         }
                     }
                 }
+
+                delay(POLL_DELAY);
             }
 
             pinCode.Clear();
