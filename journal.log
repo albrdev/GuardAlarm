@@ -70,3 +70,18 @@
     Call that one too fast caused this, and it's now fixed.
   * Making up main part of program, testing and cleaning up / restructure code
   * Removed reset button and readded it as an additional (outer) sensor (serial circuit with the other one, so we don't have to deal with two separate sensors)
+
+[2019-01-04]
+  * Created header with constant shared betwwen client/server
+  * Save method for sensor data
+  * Transmission of sensor data to server (handles all sensor statuses)
+  * Minor fixes and timeout for login state
+
+[2019-01-05]
+  * Working with diagrams in fritzing
+  * Writing manuals
+  * Quickstart finished
+
+[2019-01-06]
+  * Working with diagrams in fritzing
+  * Writing manuals (installation)
