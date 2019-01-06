@@ -3,6 +3,8 @@
 !server/*
 !client/
 !client/*
+!resources
+!resources/*
 !.gitignore
 !.gitattributes
 !journal.log

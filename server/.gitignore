@@ -7,8 +7,6 @@
 !obj/*
 !bin/
 !bin/*
-!uml/
-!uml/*
 !.gitignore
 !.gitattributes
 !Makefile
