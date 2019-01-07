@@ -44,6 +44,9 @@ bool handleData(const struct _packet_header *const pkt, size_t size)
         return false;
     }
 
+    char tmpBuf[256];
+    LogEntry logEntry;
+
     packet_sensorstatus_t *pss;
     packet_pincode_t *ppc;
     SensorEntry *sensorEntry;
@@ -60,6 +63,13 @@ bool handleData(const struct _packet_header *const pkt, size_t size)
                 sensors.Add(SensorEntry(pss->id, (SensorStatus)pss->status));
 
             SensorTable::Save(sensorsFilePath, sensors);
+
+            sprintf(tmpBuf, "Sensor status changed (id=%d, status=%d)", pss->id, pss->status);
+            logEntry = LogEntry(time(NULL), -1, tmpBuf);
+            fprintf(stderr, "*** %s\n", logEntry.ToString().c_str());
+            logger.WriteCSV(logEntry);
+            break;
+
             break;
 
         case PT_PINCODE:
@@ -69,20 +79,37 @@ bool handleData(const struct _packet_header *const pkt, size_t size)
             std::string providedPassword((const char *)ppc->pin);
             UserEntry* userEntry = NULL;
             int statusFlags = userLogin(providedPassword, users, userEntry);
-            if((statusFlags & AuthStatus::AS_SUCCESS) != 0)
+            if((statusFlags & AuthStatus::AS_SUCCESS) != 0 && userEntry->GetStatus() == UserStatus::US_ACTIVE)
             {
                 loginAttempts = 0; // Successfull login, clear login attempts
-                //isAlarmed = false; // Turn off alarm
 
                 if((statusFlags & AuthStatus::AS_EMERGENCY) != 0)
                 {
-                    fprintf(stderr, "*** Emergency code entered: id=%d, name=%s, tag=%d, status=%d\n", userEntry->GetID(), userEntry->GetUsername().c_str(), userEntry->GetTagID(), userEntry->GetStatus());
-                    logger.WriteCSV(LogEntry(time(NULL), userEntry->GetID(), "Emergency code entered"));
+                    logEntry = LogEntry(time(NULL), userEntry->GetID(), "Emergency code entered");
+                    fprintf(stderr, "*** %s\n", logEntry.ToString().c_str());
+                    logger.WriteCSV(logEntry);
                     //emergencyResponse();
                 }
                 else
                 {
-                    fprintf(stderr, "*** Successfull login: id=%d, name=%s, tag=%d, status=%d\n", userEntry->GetID(), userEntry->GetUsername().c_str(), userEntry->GetTagID(), userEntry->GetStatus());
+                    switch(ppc->mode)
+                    {
+                        case 'A':
+                            logEntry = LogEntry(time(NULL), userEntry->GetID(), "Alarm activated to mode A");
+                            break;
+                        case 'B':
+                            logEntry = LogEntry(time(NULL), userEntry->GetID(), "Alarm activated to mode B");
+                            break;
+                        case 'C':
+                            break;
+                        case 'D':
+                            break;
+                        default:
+                            logEntry = LogEntry(time(NULL), userEntry->GetID(), "User login successful");
+                    }
+
+                    fprintf(stderr, "*** %s\n", logEntry.ToString().c_str());
+                    logger.WriteCSV(logEntry);
                 }
 
                 packet_header_t pp;
@@ -93,8 +120,9 @@ bool handleData(const struct _packet_header *const pkt, size_t size)
             }
             else
             {
-                fprintf(stderr, "*** Failed login attempt\n");
-                logger.WriteCSV(LogEntry(time(NULL), -1, "Failed login attempt"));
+                logEntry = LogEntry(time(NULL), userEntry != nullptr ? userEntry->GetID() : -1, "Failed login attempt");
+                fprintf(stderr, "*** %s\n", logEntry.ToString().c_str());
+                logger.WriteCSV(logEntry);
 
                 packet_header_t pp;
                 packet_mkheader(&pp, sizeof(pp), PT_FAILURE);
@@ -102,11 +130,20 @@ bool handleData(const struct _packet_header *const pkt, size_t size)
 
                 if(++loginAttempts >= LOGINATTEMPTS_MAX)
                 {
-                    fprintf(stderr, "*** Alarm triggered due to number of login attempts exceeded\n");
-                    if(userEntry != NULL) // Could be 'NULL' here (If login failed because we didn't find a user with that name)
+                    if(userEntry != nullptr) // Could be 'NULL' here (If login failed because we didn't find a user with that name)
                     {
+                        fprintf(stderr, "bla2\n");
+                        logEntry = LogEntry(time(NULL), userEntry->GetID(), "Alarm triggered due to too many login attempts");
+
                         userEntry->SetStatus(UserStatus::US_BLOCKED); // Deactivate the account
                     }
+                    else
+                    {
+                        logEntry = LogEntry(time(NULL), -1, "Alarm triggered due to too many login attempts");
+                    }
+
+                    fprintf(stderr, "*** %s\n", logEntry.ToString().c_str());
+                    logger.WriteCSV(logEntry);
 
                     //return -1; // Program exits and could (in the future) save timestamp somewhere safe, to use and refuse to start again under a certain time (to protect from further password-cracking attempts)
                 }
@@ -145,6 +182,21 @@ int main(void)
 
     printf("Users successfully loaded %zu entries\n", users.Count());
     //printTable(users);
+
+    /*if(!LogTable::Load(logFilePath, logs))
+    {
+        fprintf(stderr, "*** Error reading logs: %s:%zu\n", logFilePath.c_str(), logs.Count() + 1);
+        return 4;
+    }*/
+
+    //printf("Logs successfully loaded %zu entries\n", logs.Count());
+    //printTable(logs);
+
+    if(!logger.Open(logFilePath))
+    {
+        fprintf(stderr, "*** Error opening log file for writing: %s\n", logFilePath.c_str());
+        return 5;
+    }
 
     fflush(stdout);
 
