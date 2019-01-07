@@ -50,9 +50,18 @@ char data[256];
 unsigned int loginAttempts = 0U;
 PIN pinCode;
 
+enum AlarmMode
+{
+    AM_NONE = 0,
+    AM_OFF = 1,
+    AM_A = 2,
+    AM_B = 3
+};
+
 const unsigned long AUTH_TIMEOUT = (1UL * 60UL) * 1000UL;
 unsigned long int authTimeout = 0UL;
 bool isAuthenticated = false;
+AlarmMode alarmMode = AM_NONE;
 bool alarmTriggered = false;
 unsigned int sirenStartFreq = VALUE_HIGHEST;
 unsigned int sirenEndFreq = VALUE_MEDIUM;
@@ -114,6 +123,7 @@ void ActivateOuterAlarm(void)
 
     isAuthenticated = false;
     authTimeout = 0;
+    alarmMode = AlarmMode::AM_B;
 
     ActivateOuterSensor();
 
@@ -125,13 +135,8 @@ void ActivateOuterAlarm(void)
 
     if(outerSensor.GetActive())
     {
-        speaker.Beep(VALUE_MEDIUM, 3000);
-        redLED.TimedBlink(3000, VALUE_HIGH);
-        unsigned long int t = millis() + 3000;
-        while(millis() < t)
-        {
-            redLED.Update();
-        }
+        //speaker.Beep(VALUE_MEDIUM, 3000);
+        //redLED.TimedBlink(3000, VALUE_HIGH);
 
         yellowLED.SetState(true);
         greenLED.Blink(VALUE_HIGH);
@@ -145,6 +150,7 @@ void ActivateAlarm(void)
 
     isAuthenticated = false;
     authTimeout = 0;
+    alarmMode = AlarmMode::AM_A;
 
     ActivateOuterSensor();
     ActivateInnerSensor();
@@ -160,6 +166,9 @@ void ActivateAlarm(void)
 
     if(outerSensor.GetActive() || motionSensor.GetActive())
     {
+        //speaker.Beep(VALUE_MEDIUM, 3000);
+        //redLED.TimedBlink(3000, VALUE_HIGH);
+
         yellowLED.SetState(true);
     }
 }
@@ -171,6 +180,7 @@ void DeactivateAlarm(void)
 
     isAuthenticated = true;
     authTimeout = millis() + AUTH_TIMEOUT;
+    alarmMode = AlarmMode::AM_OFF;
 
     outerSensor.SetActive(false);
     motionSensor.SetActive(false);
@@ -229,7 +239,12 @@ bool keypadAuthentication()
         else if(key == '#')
         {
             if(pinCode.IsValid())
-                return true;
+            {
+                if((alarmMode != AlarmMode::AM_OFF && pinCode.GetMode() == '\0') || (alarmMode == AlarmMode::AM_OFF && pinCode.GetMode() == 'A') || (alarmMode == AlarmMode::AM_OFF && pinCode.GetMode() == 'B'))
+                {
+                    return true;
+                }
+            }
 
             pinCode.Clear();
         }
