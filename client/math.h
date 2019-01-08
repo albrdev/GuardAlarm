@@ -14,6 +14,7 @@
 extern "C"
 {
 #endif
+    // lerp - Linear Interpolation: Gradually 'tween' a value from 'start' to 'end' depending on 'percentage'
     int lerp(int start, int end, float percent);
 #ifdef __cplusplus
 } // extern "C"

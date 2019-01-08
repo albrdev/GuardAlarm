@@ -3,6 +3,9 @@
 
 #include <stdint.h> /* uint8_t */
 
+/*  SpeakerNB - Speaker Non-blocking
+    A non-blocking spekaer class to handle a passive piezo speaker
+*/
 class SpeakerNB
 {
 private:
@@ -17,9 +20,13 @@ private:
 
 public:
     bool Active(void) const;
+    // Beep - Make a beeping sound with the frequency 'freq' under a duration of 'duration'
     void Beep(const int freq, const unsigned long int duration);
+    // Stop - Silence the speaker
     void Stop(void);
+    // LerpTone - Sets the values to lerp between the frequencies 'fromFreq' and 'toFreq' during a time of 'duration', the effect of this methos will need to run in Update (for non-blocking functionality)
     void LerpTone(const unsigned int fromFreq, const unsigned int toFreq, const unsigned long int duration);
+    // Update - Updates the LerpTone effect
     void Update(void);
 
     SpeakerNB(const uint8_t pin);
