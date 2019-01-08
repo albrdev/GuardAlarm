@@ -11,3 +11,4 @@
 !.gitattributes
 !Makefile
 !*.md
+!users.dat
