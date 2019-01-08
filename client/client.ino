@@ -39,6 +39,7 @@ Keypad keypad = Keypad(makeKeymap(keys), rowPins, colPins, rows, cols);
 const char digits[] = "0123456789";
 const char modes[] = "ABCD";
 
+// Commonly used constants
 const unsigned int VALUE_LOW = 250U;
 const unsigned int VALUE_MEDIUM = 500U;
 const unsigned int VALUE_HIGH = 750U;
@@ -91,6 +92,15 @@ void SendPINCode(const char *const value)
     delay(POLL_DELAY);
 }
 
+void beep(const unsigned int count, const unsigned freq, const unsigned long int duration)
+{
+    for(unsigned int i = 0U; i < count; i++)
+    {
+        speaker.Beep(freq, duration);
+        delay(duration * 2U);
+    }
+}
+
 void ActivateOuterSensor(void)
 {
     outerSensor.SetActive(true);
@@ -128,15 +138,18 @@ void ActivateOuterAlarm(void)
     ActivateOuterSensor();
 
     resetLEDs();
-    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
-    delay(500);
-    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
-    delay(500);
+    beep(2, VALUE_HIGHEST, VALUE_LOW);
 
     if(outerSensor.GetActive())
     {
-        //speaker.Beep(VALUE_MEDIUM, 3000);
-        //redLED.TimedBlink(3000, VALUE_HIGH);
+        //redLED.TimedBlink(3000UL, VALUE_HIGH);
+        //unsigned long int endTime = millis() + 3000UL;
+        //while(millis() < endTime)
+        //{
+        //    redLED.Update();
+        //    //speaker.Beep(VALUE_MEDIUM, 500);
+        //    //delay(1000);
+        //}
 
         yellowLED.SetState(true);
         greenLED.Blink(VALUE_HIGH);
@@ -156,12 +169,7 @@ void ActivateAlarm(void)
     ActivateInnerSensor();
 
     resetLEDs();
-    speaker.Beep(VALUE_HIGHEST, VALUE_MEDIUM);
-    delay(750);
-    speaker.Beep(VALUE_HIGHEST, VALUE_MEDIUM);
-    delay(750);
-    speaker.Beep(VALUE_HIGHEST, VALUE_MEDIUM);
-    delay(750);
+    beep(3, VALUE_HIGHEST, VALUE_MEDIUM);
     greenLED.SetState(true);
 
     if(outerSensor.GetActive() || motionSensor.GetActive())
@@ -185,11 +193,7 @@ void DeactivateAlarm(void)
     outerSensor.SetActive(false);
     motionSensor.SetActive(false);
 
-    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
-    delay(500);
-    speaker.Beep(VALUE_HIGHEST, VALUE_LOW);
-    delay(500);
-
+    beep(2, VALUE_HIGHEST, VALUE_LOW);
     resetLEDs();
     greenLED.SetState(false);
 }
@@ -223,7 +227,7 @@ void ResetAlarm(void)
 bool keypadAuthentication()
 {
     char key = keypad.getKey();
-    if(key != '\0')
+    if(key != NO_KEY)
     {
         speaker.Beep(VALUE_HIGH, 100);
 
