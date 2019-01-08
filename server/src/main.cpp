@@ -165,11 +165,7 @@ int main(void)
         return 1;
     }
 
-    if(!SensorTable::Load(sensorsFilePath, sensors))
-    {
-        fprintf(stderr, "*** Error reading sensors: %s:%zu\n", sensorsFilePath.c_str(), sensors.Count() + 1);
-        return 5;
-    }
+    SensorTable::Load(sensorsFilePath, sensors);
 
     printf("Sensors successfully loaded %zu entries\n", sensors.Count());
     //printTable(sensors);
