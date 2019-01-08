@@ -22,6 +22,8 @@ SonicMotionSensor motionSensor(102, A3, A4, 50.0, false); // Inner sensor
 const unsigned long int MS_SETDISTANCE_MAXDELAY = 5000UL;
 const unsigned long int MS_FAILUREDELAY = 1000UL;
 unsigned long int motionSensorFailurePoint = 0UL;
+bool motionSensorFailure = false;
+bool outerSensorFailure = false;
 
 const byte rows = 4;
 const byte cols = 4;
@@ -104,7 +106,9 @@ void beep(const unsigned int count, const unsigned freq, const unsigned long int
 void ActivateOuterSensor(void)
 {
     outerSensor.SetActive(true);
-    SendSensorStatus(outerSensor.GetID(), SensorStatus::SS_CLOSED);
+
+    outerSensorFailure = !outerSensor.GetState();
+    SendSensorStatus(outerSensor.GetID(), outerSensorFailure ? SensorStatus::SS_FAILURE : SensorStatus::SS_CLOSED);
 }
 
 void ActivateInnerSensor(void)
@@ -114,6 +118,7 @@ void ActivateInnerSensor(void)
     {
         if(millis() >= endTime)
         {
+            motionSensorFailure = true;
             SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_FAILURE);
             return;
         }
@@ -140,7 +145,7 @@ void ActivateOuterAlarm(void)
     resetLEDs();
     beep(2, VALUE_HIGHEST, VALUE_LOW);
 
-    if(outerSensor.GetActive())
+    if(!outerSensorFailure)
     {
         //redLED.TimedBlink(3000UL, VALUE_HIGH);
         //unsigned long int endTime = millis() + 3000UL;
@@ -172,7 +177,7 @@ void ActivateAlarm(void)
     beep(3, VALUE_HIGHEST, VALUE_MEDIUM);
     greenLED.SetState(true);
 
-    if(outerSensor.GetActive() || motionSensor.GetActive())
+    if(!outerSensorFailure || !motionSensorFailure)
     {
         //speaker.Beep(VALUE_MEDIUM, 3000);
         //redLED.TimedBlink(3000, VALUE_HIGH);
@@ -263,39 +268,46 @@ bool keypadAuthentication()
 
 void checkSensors()
 {
-    if(outerSensor.GetActive() && !outerSensor.GetState())
+    if(!outerSensorFailure)
     {
-        SendSensorStatus(outerSensor.GetID(), SensorStatus::SS_OPEN);
-        TriggerAlarm();
+        if(outerSensor.GetActive() && !outerSensor.GetState())
+        {
+            SendSensorStatus(outerSensor.GetID(), SensorStatus::SS_OPEN);
+            TriggerAlarm();
+        }
     }
 
-    if(motionSensor.GetActive() && motionSensor.GetMonitorDistance() > 0.0)
+    if(!motionSensorFailure)
     {
-        MotionSensorState mss = motionSensor.GetState();
-        switch(mss)
+        if(motionSensor.GetActive() && motionSensor.GetMonitorDistance() > 0.0)
         {
-            case MotionSensorState::MSS_FAILURE:
-                if(!motionSensor.GetActive() || alarmTriggered) //
-                    return;
+            MotionSensorState mss = motionSensor.GetState();
+            switch(mss)
+            {
+                case MotionSensorState::MSS_FAILURE:
+                    if(!motionSensor.GetActive() || alarmTriggered)
+                        return;
 
-                if(motionSensorFailurePoint == 0U)
-                {
-                    motionSensorFailurePoint = millis() + MS_FAILUREDELAY;
-                }
-                else if(millis() >= motionSensorFailurePoint)
-                {
-                    SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_FAILURE);
+                    if(motionSensorFailurePoint == 0U)
+                    {
+                        motionSensorFailurePoint = millis() + MS_FAILUREDELAY;
+                    }
+                    else if(millis() >= motionSensorFailurePoint)
+                    {
+                        motionSensorFailure = true;
+                        SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_FAILURE);
+                        TriggerAlarm();
+                    }
+                    break;
+                case MotionSensorState::MSS_TRIGGERED:
+                    SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_OPEN);
                     TriggerAlarm();
-                }
-                break;
-            case MotionSensorState::MSS_TRIGGERED:
-                SendSensorStatus(motionSensor.GetID(), SensorStatus::SS_OPEN);
-                TriggerAlarm();
-                motionSensorFailurePoint = 0U;
-                break;
-            case MotionSensorState::MSS_IDLE:
-                motionSensorFailurePoint = 0U;
-                break;
+                    motionSensorFailurePoint = 0U;
+                    break;
+                case MotionSensorState::MSS_IDLE:
+                    motionSensorFailurePoint = 0U;
+                    break;
+            }
         }
     }
 }
