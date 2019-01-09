@@ -132,7 +132,6 @@ bool handleData(const struct _packet_header *const pkt, size_t size)
                 {
                     if(userEntry != nullptr) // Could be 'NULL' here (If login failed because we didn't find a user with that name)
                     {
-                        fprintf(stderr, "bla2\n");
                         logEntry = LogEntry(time(NULL), userEntry->GetID(), "Alarm triggered due to too many login attempts");
 
                         userEntry->SetStatus(UserStatus::US_BLOCKED); // Deactivate the account
