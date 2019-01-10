@@ -42,7 +42,7 @@
 [2019-01-02]
   * Made a sonic sensor and a derrived motion sensor class to detect motions.
     It can automatically set a monitoring distance at startup and continiously checking if the distance has changed (you could set a difference threshold to which it will detect any change,
-    let's say we are monitoring at a distance of x meters and we have a threshold of 0.2m, the motion detector will trigger on x ± 0.2m)
+    let's say we are monitoring at a distance of x meters and we have a threshold of 0.2m, the motion detector will trigger on x ? 0.2m)
 
   * Motion detector could also fail. Sometimes it will give back random weird values (maybe due to the signal bouncing of several object with different distances (plain wall or surface worked better)),
     this could be fixed by setting timeout in pulseIn function and it would return 0 instead, but 0 is also returned when power circuit has been broken,
@@ -88,4 +88,4 @@
 
 [2019-01-07]
   * Activated server logging
-  * Installation manual now got a tbale of contents and proper page breaks
+  * Installation manual now got a table of contents and proper page breaks
